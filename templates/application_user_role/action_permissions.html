@@ -1,0 +1,62 @@
+{% import "backend/macros.html" as s with context %}
+{% extends s.layout() %}
+
+{% block layout_content %}
+{% set list = context[scaffolding.plural] %}
+<div class="ibox-content m-b-sm border-bottom">
+    <div class="p-xs">
+        <div class="pull-left m-r-md">
+            <i class="fa fa-shield text-navy mid-icon"></i>
+        </div>
+        <h2>角色權限管理 - {{ item.title }}</h2>
+        <span>針對特定角色給與操作的權限。</span><br />
+        {% if uri_exists_with_permission(action="edit") and application_user_level >= item.level %}, <a href="{{uri_action_link('edit', item)}}"> 編輯此項目 </a>{% endif %}
+        {% if uri_exists_with_permission(action="view") and application_user_level >= item.level %}, <a href="{{uri_action_link('edit', item)}}"> 檢視此項目 </a>{% endif %}
+        {% if uri_exists_with_permission(action="add") -%}, <a href="{{uri_action_link('add') }}">{{ s.scaffold_title("add") }}</a><br/>{%- endif -%}
+    </div>
+</div>
+
+<div class="wrapper wrapper-content" style="display: flex;flex-flow: row wrap;align-content: flex-start;align-items: stretch;margin: 0 -18px;justify-content: space-between">
+{#    <div class="row">#}
+        {%- set n = 0 -%}
+        {% for item in list %}
+        {%- set n = n + 1 -%}
+        <div class="" style="flex: 0 0 23%;box-sizing: border-box; background: #fff; margin: 10px 0;flex-grow:1">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>{{ item.group }}</h5>
+                </div>
+                <div class="ibox-content list-operations action-permissions-operations">
+                    <ul class="folder-list m-b-md" style="padding: 0">
+                    {% for act in item.actions %}
+                        <li>
+                            <input type="checkbox" {% if act.enable %}checked{% endif %} id="ro-field-{{ act.checkbox_id }}" data-uri="{{ act.uri }}">
+                            <label for="ro-field-{{ act.checkbox_id }}">{% if act.action == "list" %}<b class="text-success">{{ act.name }}</b>{% else %}{{ act.name }}{% endif %}</label>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% if n % 4 == 0 %}
+{#    </div>#}
+{#    <div class="row">#}
+        {% endif %}
+        {% endfor %}
+{#    </div>#}
+</div>
+{% endblock %}
+{% block layout_head -%}
+{%- endblock %}
+{% block layout_scripts -%}
+    <script>
+        $('.action-permissions-operations ul input[type=checkbox]').change(function() {
+            var id = $(this).attr("id").replace("ro-field-", "");
+            var val = $(this).is(":checked");
+            console.log(id, val);
+            json("/admin/application_user_role/permissions_set.json", "role_key={{ item_key }}&uri=" + $(this).data("uri") + "&enable=" + val, function(data){
+                backend.message.quick_info(data.msg);
+            })
+        });
+    </script>
+{%- endblock %}

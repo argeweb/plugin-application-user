@@ -1,0 +1,61 @@
+{% import "backend/macros.html" as s with context %}
+{% import 'backend/form_macros.html' as f with context %}
+{% extends s.layout() %}
+
+{% block layout_content %}
+<div class="ibox-content m-b-sm border-bottom">
+    <div class="p-xs">
+        <div class="pull-left m-r-md">
+            <i class="fa fa-user text-navy mid-icon"></i>
+        </div>
+        <h2>個人資料</h2>
+        <span>編輯或修改密碼。</span>
+        {% if last_record_date %}<span class="text-muted small pull-right visible-sm visible-md visible-lg">最後更新：<i class="fa fa-clock-o"></i> {{ print_value(last_record_date) }}</span>{% endif %}
+    </div>
+</div>
+
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="col-sm-12 visible-xs">
+            <h2>{{ s.scaffold_title(route.action) }}</h2>
+        </div>
+    </div>
+    <iframe name="iframeForm" width="0" height="0" frameborder="0" seamless></iframe>
+    {% block form_tag %}
+    <form method="POST"
+          action="{{scaffolding.form_action|default(uri(_pass_all=True), True)}}"
+          class="form-horizontal"
+          enctype="{{scaffolding.form_encoding|default('application/x-www-form-urlencoded', True)}}"
+          role="form" accept-charset="UTF-8"
+          target="iframeForm">
+        {% endblock %}
+        <div class="col-sm-12 animated fadeInUp" style="margin-bottom: 30px;">
+            <div class="ibox-content">
+                {{events.before_form_fields()}}
+                <div class="row">
+                    {% block form_fields %}
+                    {% for field in form %}
+                    {% if not field.name in scaffolding.excluded_form_fields %}
+                    {{ f.form_field(form, field) }}
+                    {% endif %}
+                    {% endfor %}
+                    {% endblock %}
+                    {% block form_actions_footer %}
+                    <div class="col-xs-12 text-right">
+                        {% block submit_button %}
+                            <button class="btn btn-primary btn-lg" type="submit">
+                                <i class="icon">save</i> {% block submit_text_f %}{% endblock %}
+                            </button>
+                        {% endblock %}
+                    </div>
+                    {% endblock %}
+                </div>
+                {{events.after_form_fields()}}
+            </div>
+            <input type="hidden" name="returnType" value="json" />
+            <input type="hidden" name="routeAction" value="{{ route.action }}" />
+            <input type="hidden" name="routeName" value="{{ route.name }}" />
+        </div>
+    </form>
+</div>
+{% endblock %}
