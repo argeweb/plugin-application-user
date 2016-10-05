@@ -41,6 +41,6 @@ application_user_role_action_helper = {
         {"action": "edit", "name": u"編輯角色"},
         {"action": "view", "name": u"檢視角色"},
         {"action": "delete", "name": u"刪除角色"},
-        {"action": "action_permissions", "name": u"<b class='text-danger'>權限設定</b>"}
+        {"action": "action_permissions", "name": u"權限設定"}
     ]
 }
