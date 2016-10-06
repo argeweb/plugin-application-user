@@ -52,16 +52,25 @@ class ApplicationUser(Controller):
         target_level = target.role.get().level
         if self.application_user_level < target_level:
             return self.abort(403)
+        change_password = u""
         def scaffold_before_validate(**kwargs):
             parser = kwargs["parser"]
             change_level = parser.data["role"].get().level
+            item = kwargs["item"]
+            item.old_password = item.password
+            item.new_password = parser.data["password"]
             def validate():
-                if  self.application_user_level < change_level:
+                item = kwargs["item"]
+                if self.application_user_level < change_level:
                     parser.errors["role"] = u"您的權限等級低於此角色"
                     return False
                 return parser.container.validate() if parser.container else False
             parser.validate = validate
+        def bycrypt_password(**kwargs):
+            item = kwargs["item"]
+            item.bycrypt_password()
         self.events.scaffold_before_validate += scaffold_before_validate
+        self.events.scaffold_after_save += bycrypt_password
         return scaffold.edit(self, key)
 
     @csrf_protect

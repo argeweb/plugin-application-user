@@ -8,7 +8,8 @@
 
 from argeweb import BasicModel
 from argeweb import Fields
-from application_user_role_model import ApplicationUserRoleModel
+from application_user_role_model import ApplicationUserRoleModel as role
+from ..libs.bcrypt import bcrypt
 
 
 class ApplicationUserModel(BasicModel):
@@ -26,63 +27,37 @@ class ApplicationUserModel(BasicModel):
     password = Fields.StringProperty(required=True)
     avatar = Fields.ImageProperty()
     is_enable = Fields.BooleanProperty(default=True)
-    role = Fields.CategoryProperty(kind=ApplicationUserRoleModel, required=True)
+    role = Fields.CategoryProperty(kind=role, required=True)
 
     @classmethod
     def init(cls, name, account, password, prohibited_actions, avatar):
-        if ApplicationUserRoleModel.has_record() is False:
-            su_role = ApplicationUserRoleModel()
-            su_role.name = "super_monkey"
-            su_role.title = u"超級管理員"
-            su_role.level = 9999
-            su_role.put()
-
-            admin_role = ApplicationUserRoleModel()
-            admin_role.name = "super_user"
-            admin_role.title = u"管理員"
-            admin_role.level = 999
-            admin_role.prohibited_actions = prohibited_actions
-            admin_role.put()
-
-            user_role = ApplicationUserRoleModel()
-            user_role.name = "user"
-            user_role.title = u"會員"
-            user_role.level = 999
-            user_role.prohibited_actions = prohibited_actions
-            user_role.put()
-        else:
-            su_role = ApplicationUserRoleModel.get_role("super_monkey")
-            admin_role = ApplicationUserRoleModel.get_role("super_user")
+        su_role = role.get_or_create("super_monkey", u"超級管理員", 9999, prohibited_actions)
+        admin_role = role.get_or_create("super_user", u"管理員", 9999, prohibited_actions)
+        user_role = role.get_or_create("user", u"會員", 1, prohibited_actions)
         cls.create_account(u"猴子", "iammonkey", "iammonkey", su_role.key, avatar)
         return cls.create_account(name, account, password, admin_role.key, avatar)
 
     @classmethod
-    def get_login(cls, account, password, is_enable=True):
-        a = cls.query(cls.account == account, cls.password == password,
-                      cls.is_enable == is_enable).get()
+    def get_user(cls, account, password, is_enable=True):
+        a = cls.query(
+            cls.account == account,
+            cls.is_enable == is_enable).get()
         if a is None:
             return None
-        role = None
-        if a.role is not None:
-            role = a.role.get()
-        if role is not None and role.is_enable is False:
+        if bcrypt.hashpw(password, a.password) != a.password:
             return None
+        if a.role is not None:
+            a_role = a.role.get()
+            if a_role is not None and a_role.is_enable is False:
+                return None
         return a
-
-    @classmethod
-    def has_record(cls):
-        r = cls.query().get()
-        if r is not None:
-            return True
-        else:
-            return False
 
     @classmethod
     def create_account(cls, name, account, password, role, avatar=None):
         n = cls()
         n.name = name
         n.account = account
-        n.password = password
+        n.password = bcrypt.hashpw(password, bcrypt.gensalt())
         n.role = role
         n.avatar = avatar
         n.put()
@@ -91,3 +66,8 @@ class ApplicationUserModel(BasicModel):
     @classmethod
     def get_list(cls):
         return cls.query(cls.account != "iammonkey").order(cls.account, -cls.sort, -cls._key)
+
+    def bycrypt_password(self):
+        if self.old_password != self.new_password:
+            self.password = u"" + bcrypt.hashpw(u"" + self.new_password, bcrypt.gensalt())
+            self.put()

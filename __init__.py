@@ -9,13 +9,13 @@
 from plugins.application_user.models.application_user_model import ApplicationUserModel
 
 
-login = ApplicationUserModel.get_login
+get_user = ApplicationUserModel.get_user
 has_record = ApplicationUserModel.has_record
 create_account = ApplicationUserModel.create_account
 application_user_init = ApplicationUserModel.init
 
 __all__ = (
-    'login',
+    'get_user',
     'has_record'
     'create_account'
     'application_user_init'

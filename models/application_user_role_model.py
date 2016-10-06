@@ -26,6 +26,16 @@ class ApplicationUserRoleModel(BasicModel):
     level = Fields.IntegerProperty(default=0)
 
     @classmethod
+    def create_role(cls, name, title, level, prohibited_actions):
+        n = cls()
+        n.name = name
+        n.title = title
+        n.level = prohibited_actions
+        n.prohibited_actions = prohibited_actions
+        n.put()
+        return n
+
+    @classmethod
     def get_role(cls, name):
         a = cls.query(cls.name == name).get()
         return a
@@ -39,15 +49,13 @@ class ApplicationUserRoleModel(BasicModel):
             return False
 
     @classmethod
-    def create_account(cls, name, account, password, prohibited_actions):
-        n = cls()
-        n.name = name
-        n.account = account
-        n.password = password
-        n.prohibited_actions = prohibited_actions
-        n.put()
-        return n
+    def get_or_create(cls, name, title, level, prohibited_actions):
+        r = cls.get_role(name)
+        if r is None:
+            r = cls.create_role(name, title, level, prohibited_actions)
+        return r
 
     @classmethod
     def get_list(cls):
         return cls.query(cls.level < 1000).order(cls.level, -cls.sort)
+
