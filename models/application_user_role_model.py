@@ -30,7 +30,7 @@ class ApplicationUserRoleModel(BasicModel):
         n = cls()
         n.name = name
         n.title = title
-        n.level = prohibited_actions
+        n.level = level
         n.prohibited_actions = prohibited_actions
         n.put()
         return n
@@ -39,14 +39,6 @@ class ApplicationUserRoleModel(BasicModel):
     def get_role(cls, name):
         a = cls.query(cls.name == name).get()
         return a
-
-    @classmethod
-    def has_record(cls):
-        r = cls.query().get()
-        if r is not None:
-            return True
-        else:
-            return False
 
     @classmethod
     def get_or_create(cls, name, title, level, prohibited_actions):
