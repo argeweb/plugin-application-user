@@ -32,10 +32,12 @@ class ApplicationUserModel(BasicModel):
     @classmethod
     def init(cls, name, account, password, prohibited_actions, avatar):
         su_role = role.get_or_create("super_monkey", u"超級管理員", 9999, prohibited_actions)
-        admin_role = role.get_or_create("super_user", u"管理員", 9999, prohibited_actions)
+        admin_role = role.get_or_create("super_user", u"管理員", 999, prohibited_actions)
         user_role = role.get_or_create("user", u"會員", 1, prohibited_actions)
-        cls.create_account(u"猴子", "iammonkey", "iammonkey", su_role.key, avatar)
-        return cls.create_account(name, account, password, admin_role.key, avatar)
+        if cls.has_record() is False:
+            cls.create_account(u"猴子", "iammonkey", "iammonkey", su_role.key, avatar)
+            return cls.create_account(name, account, password, admin_role.key, avatar)
+        return None
 
     @classmethod
     def get_user(cls, account, password, is_enable=True):

@@ -6,7 +6,7 @@
 # Web: http://www.yooliang.com/
 # Date: 2015/7/12.
 
-from argeweb import Controller, scaffold, route_menu, route_with
+from argeweb import Controller, scaffold, route_menu, route_with, settings
 from argeweb.components.pagination import Pagination
 from argeweb.components.csrf import CSRF, csrf_protect
 from argeweb.components.search import Search
@@ -23,6 +23,14 @@ class ApplicationUser(Controller):
         title = application_user_action_helper["actions"]
         display_properties = ("name", "account", "is_enable", "sort", "created", "modified")
         display_properties_in_list = ("name", "account")
+
+    @route_with("/application_user_init")
+    def application_user_init(self):
+        prohibited_actions = settings.get("application_user_prohibited_actions", u"")
+        from plugins.application_user import application_user_init, has_record
+        application_user_init(u"管理員", "admin", "qwER12#$", prohibited_actions,
+                             "/plugins/backend_ui_material/static/img/profile_small.jpg")
+        return self.redirect("/")
 
     @route_menu(list_name=u"backend", text=u"帳號管理", sort=9700, icon="users", group=u"帳號管理")
     @route_with("/admin/application_user/list")
@@ -60,7 +68,6 @@ class ApplicationUser(Controller):
             item.old_password = item.password
             item.new_password = parser.data["password"]
             def validate():
-                item = kwargs["item"]
                 if self.application_user_level < change_level:
                     parser.errors["role"] = u"您的權限等級低於此角色"
                     return False
