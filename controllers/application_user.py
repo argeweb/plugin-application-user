@@ -10,7 +10,6 @@ from argeweb import Controller, scaffold, route_menu, route_with, settings
 from argeweb.components.pagination import Pagination
 from argeweb.components.csrf import CSRF, csrf_protect
 from argeweb.components.search import Search
-from .. import application_user_action_helper
 
 
 class ApplicationUser(Controller):
@@ -20,14 +19,13 @@ class ApplicationUser(Controller):
         pagination_limit = 50
 
     class Scaffold:
-        title = application_user_action_helper["actions"]
         display_properties = ("name", "account", "is_enable", "sort", "created", "modified")
         display_properties_in_list = ("name", "account")
 
     @route_with("/application_user_init")
     def application_user_init(self):
         prohibited_actions = settings.get("application_user_prohibited_actions", u"")
-        from plugins.application_user import application_user_init, has_record
+        from ...application_user import application_user_init
         application_user_init(u"管理員", "admin", "qwER12#$", prohibited_actions,
                              "/plugins/backend_ui_material/static/img/profile_small.jpg")
         return self.redirect("/")

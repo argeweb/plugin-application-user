@@ -6,7 +6,7 @@
 # Web: http://www.yooliang.com/
 # Date: 2015/7/12.
 
-from plugins.application_user.models.application_user_model import ApplicationUserModel
+from .models.application_user_model import ApplicationUserModel
 
 
 get_user = ApplicationUserModel.get_user
@@ -29,8 +29,7 @@ application_user_action_helper = {
         {"action": "edit", "name": u"編輯帳號"},
         {"action": "view", "name": u"檢視帳號"},
         {"action": "delete", "name": u"刪除帳號"},
-    ],
-    "related_action": "application_user_role"
+    ]
 }
 
 application_user_role_action_helper = {

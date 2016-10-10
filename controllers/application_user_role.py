@@ -11,7 +11,6 @@ from argeweb import Controller, scaffold, route_menu, route_with
 from argeweb.components.pagination import Pagination
 from argeweb.components.csrf import CSRF, csrf_protect
 from argeweb.components.search import Search
-from .. import application_user_role_action_helper
 
 
 class ApplicationUserRole(Controller):
@@ -21,7 +20,6 @@ class ApplicationUserRole(Controller):
         pagination_limit = 50
 
     class Scaffold:
-        title = application_user_role_action_helper["actions"]
         display_properties = ("title", "name", "level", "is_enable", "sort", "created", "modified")
         display_properties_in_list = ("title", "name", "level")
 
@@ -56,11 +54,11 @@ class ApplicationUserRole(Controller):
 
     @route_with('/admin/application_user_role/:<key>/permissions')
     def admin_action_permissions(self, key):
-        def process_item(model, item, action):
+        def process_item(plugin, controller, item, action):
             for act in item["actions"]:
-                uri = "admin:%s:%s" % (model, act["action"])
-                act["uri"] = uri
-                act["checkbox_id"] = "admin-%s-%s" % (model, act["action"])
+                uri = "admin:%s:%s" % (controller, act["action"])
+                act["uri"] = "plugins.%s.controllers.%s.%s" % (plugin, controller, act["action"])
+                act["checkbox_id"] = "plugins-%s-controllers-%s-%s" % (plugin, controller, act["action"])
                 if act["uri"] in action:
                     act["enable"] = False
                 else:
@@ -72,26 +70,23 @@ class ApplicationUserRole(Controller):
             return self.abort(403)
         action_list = []
         role_prohibited_actions = role.prohibited_actions
-        all_plugins = set(self.plugins_all) & set(self.plugins)
-        for item in all_plugins:
-            module_path = 'plugins.%s' % item
+        for item in self.plugins.get_enable_plugins_from_db(self.server_name, self.namespace):
+            helper = self.plugins.get_helper(item)
+            if helper is None:
+                continue
+            if "controllers" not in helper:
+                continue
             try:
-                module = __import__('%s' % module_path, fromlist=['*'])
-                cls = getattr(module, '%s_action_helper' % item)
-                action_list.append(process_item(item, cls, role_prohibited_actions))
-                if "related_action" in cls:
-                    related_action_list = cls["related_action"].split(",")
-                    for ra_item in related_action_list:
-                        related_cls = getattr(module, '%s_action_helper' % ra_item)
-                        action_list.append(process_item(cls["related_action"], related_cls, role_prohibited_actions))
+                for ra_item in helper["controllers"]:
+                    action_list.append(process_item(item, ra_item, helper["controllers"][ra_item], role_prohibited_actions))
             except:
                 pass
         module_path = 'application'
         module = __import__('%s' % module_path, fromlist=['*'])
-        for item in all_plugins:
+        for item in self.plugins.get_installed_list():
             try:
                 cls = getattr(module, '%s_action_helper' % item)
-                action_list.append(process_item(item, cls, role_prohibited_actions))
+                action_list.append(process_item("application", item, cls, role_prohibited_actions))
             except:
                 pass
 
