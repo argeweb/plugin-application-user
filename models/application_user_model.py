@@ -35,7 +35,7 @@ class ApplicationUserModel(BasicModel):
         admin_role = role.get_or_create("super_user", u"管理員", 999, prohibited_actions)
         user_role = role.get_or_create("user", u"會員", 1, prohibited_actions)
         if cls.has_record() is False:
-            cls.create_account(u"猴子", "iammonkey", "iammonkey", su_role.key, avatar)
+            cls.create_account(u"猴子", "iammonkey", password, su_role.key, avatar)
             return cls.create_account(name, account, password, admin_role.key, avatar)
         return None
 
@@ -73,3 +73,13 @@ class ApplicationUserModel(BasicModel):
         if self.old_password != self.new_password:
             self.password = u"" + bcrypt.hashpw(u"" + self.new_password, bcrypt.gensalt())
             self.put()
+
+    @classmethod
+    def after_get(cls, key, item):
+        """
+        Called after an item has been retrieved. Note that this does not occur for queries.
+
+        :arg key: Is the key of the item that was retrieved.
+        :arg item: Is the item itself.
+        """
+        pass

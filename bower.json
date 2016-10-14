@@ -1,5 +1,5 @@
 {
-  "name": "application_user",
+  "name": "application-user",
   "homepage": "https://github.com/argeweb/plugin-application-user",
   "authors": [
     "cwen0708 <cwen0708@gmail.com>"
@@ -13,7 +13,5 @@
     "bower_components",
     "test",
     "tests"
-  ],
-  "dependencies": {
-  }
+  ]
 }

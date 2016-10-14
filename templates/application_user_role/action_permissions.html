@@ -10,9 +10,6 @@
         </div>
         <h2>角色權限管理 - {{ item.title }}</h2>
         <span>針對特定角色給與操作的權限。</span><br />
-        {% if uri_exists_with_permission(action="edit") and application_user_level >= item.level %}, <a href="{{uri_action_link('edit', item)}}"> 編輯此項目 </a>{% endif %}
-        {% if uri_exists_with_permission(action="view") and application_user_level >= item.level %}, <a href="{{uri_action_link('edit', item)}}"> 檢視此項目 </a>{% endif %}
-        {% if uri_exists_with_permission(action="add") -%}, <a href="{{uri_action_link('add') }}">{{ s.scaffold_title("add") }}</a><br/>{%- endif -%}
     </div>
 </div>
 
