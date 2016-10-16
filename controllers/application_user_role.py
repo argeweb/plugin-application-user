@@ -7,7 +7,7 @@
 # Date: 2015/7/12.
 
 
-from argeweb import Controller, scaffold, route_menu, route_with
+from argeweb import Controller, scaffold, route_menu, route_with, route
 from argeweb.components.pagination import Pagination
 from argeweb.components.csrf import CSRF, csrf_protect
 from argeweb.components.search import Search
@@ -95,7 +95,6 @@ class ApplicationUserRole(Controller):
         self.context["application_user_role"] = action_list
 
     @route_menu(list_name=u"backend", text=u"角色管理", sort=9701, icon="users", group=u"帳號管理")
-    @route_with("/admin/application_user_role/list")
     def admin_list(self):
         self.context["application_user_role"] = self.application_user.role
         return scaffold.list(self)
