@@ -48,7 +48,11 @@ class ApplicationUser(Controller):
                     return False
                 return parser.container.validate() if parser.container else False
             parser.validate = validate
+        def bycrypt_password(**kwargs):
+            item = kwargs["item"]
+            item.bycrypt_password_for_add()
         self.events.scaffold_before_validate += scaffold_before_validate
+        self.events.scaffold_after_save += bycrypt_password
         return scaffold.add(self)
 
     @csrf_protect
@@ -93,7 +97,11 @@ class ApplicationUser(Controller):
                     return False
                 return parser.container.validate() if parser.container else False
             parser.validate = validate
+        def bycrypt_password(**kwargs):
+            item = kwargs["item"]
+            item.bycrypt_password()
         self.events.scaffold_before_validate += scaffold_before_validate
+        self.events.scaffold_after_save += bycrypt_password
         return scaffold.edit(self, self.application_user.key)
 
     def admin_delete(self, key):
