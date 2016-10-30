@@ -74,12 +74,6 @@ class ApplicationUserModel(BasicModel):
             self.password = u"" + bcrypt.hashpw(u"" + self.new_password, bcrypt.gensalt())
             self.put()
 
-    @classmethod
-    def after_get(cls, key, item):
-        """
-        Called after an item has been retrieved. Note that this does not occur for queries.
-
-        :arg key: Is the key of the item that was retrieved.
-        :arg item: Is the item itself.
-        """
-        pass
+    def bycrypt_password_for_add(self):
+        self.password = u"" + bcrypt.hashpw(u"" + self.password, bcrypt.gensalt())
+        self.put()

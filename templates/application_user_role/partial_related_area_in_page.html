@@ -9,9 +9,9 @@
         <ul class="dropdown-menu folder-list ">
             {%- if route.action != 'add' -%}
             {%- if not item %}{%- set item = context[scaffolding.singular] -%}{% endif -%}
-            {% if uri_exists_with_permission(action="view") and route.action == 'edit' and application_user_level >= item.level %}<li><a href="{{uri_action_link('view', item)}}" class="view-url" target="aside_iframe"><i class="fa fa-angle-right"></i>  檢視此項目 </a></li>{% endif %}
-            {% if uri_exists_with_permission(action='edit') and route.action == 'view' and application_user_level >= item.level %}<li><a href="{{uri_action_link('edit', item)}}" class="edit-url" target="aside_iframe"><i class="fa fa-angle-right"></i>  編輯此項目 </a></li>{% endif %}
-            {% if uri_exists_with_permission(action='action_permissions') and application_user_level >= item.level %}<li><a href="{{uri_action_link('action_permissions', item)}}" target="aside_iframe"><i class="fa fa-angle-right"></i> 修改權限 </a></li>{% endif %}
+            {% if uri_exists_with_permission(action="view", item=item) and route.action == 'edit' and application_user_level >= item.level %}<li><a href="{{uri_action_link('view', item)}}" class="view-url" target="aside_iframe"><i class="fa fa-angle-right"></i>  檢視此項目 </a></li>{% endif %}
+            {% if uri_exists_with_permission(action='edit', item=item) and route.action == 'view' and application_user_level >= item.level %}<li><a href="{{uri_action_link('edit', item)}}" class="edit-url" target="aside_iframe"><i class="fa fa-angle-right"></i>  編輯此項目 </a></li>{% endif %}
+            {% if uri_exists_with_permission(action='action_permissions', item=item) and application_user_level >= item.level %}<li><a href="{{uri_action_link('action_permissions', item)}}" target="aside_iframe"><i class="fa fa-angle-right"></i> 修改權限 </a></li>{% endif %}
             {%- endif -%}
             {% for nav_item in scaffolding.navigation -%}
             {% if uri_exists_with_permission("admin:" + scaffolding.singular + ":" + nav_item.action, item=item) %}

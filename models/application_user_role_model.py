@@ -51,3 +51,6 @@ class ApplicationUserRoleModel(BasicModel):
     def get_list(cls):
         return cls.query(cls.level < 1000).order(cls.level, -cls.sort)
 
+    @classmethod
+    def find_lowest_level(cls):
+        return cls.query().order(cls.level).get()
