@@ -11,19 +11,11 @@ from argeweb import Fields
 
 
 class ApplicationUserRoleModel(BasicModel):
-    class Meta:
-        label_name = {
-            "title": u"角色名稱",
-            "name": u"角色識別碼",
-            "is_enable": u"啟用",
-            "prohibited_actions": u"禁止的操作",
-            "level": u"權限等級"
-        }
-    title = Fields.StringProperty(required=True)
-    name = Fields.StringProperty(required=True)
-    prohibited_actions = Fields.StringProperty(default="")
-    is_enable = Fields.BooleanProperty(default=True)
-    level = Fields.IntegerProperty(default=0)
+    title = Fields.StringProperty(required=True, verbose_name=u"角色名稱")
+    name = Fields.StringProperty(required=True, verbose_name=u"角色識別碼")
+    prohibited_actions = Fields.StringProperty(default="", verbose_name=u"禁止的操作")
+    is_enable = Fields.BooleanProperty(default=True, verbose_name=u"啟用")
+    level = Fields.IntegerProperty(default=0, verbose_name=u"權限等級")
 
     @classmethod
     def create_role(cls, name, title, level, prohibited_actions):

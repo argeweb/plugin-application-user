@@ -13,21 +13,12 @@ from ..libs.bcrypt import bcrypt
 
 
 class ApplicationUserModel(BasicModel):
-    class Meta:
-        label_name = {
-            "name": u"名稱",
-            "account": u"帳號",
-            "password": u"密碼",
-            "is_enable": u"啟用",
-            "avatar": u"頭像",
-            "role": u"角色"
-            }
-    name = Fields.StringProperty(required=True)
-    account = Fields.StringProperty(required=True)
-    password = Fields.StringProperty(required=True)
-    avatar = Fields.ImageProperty()
-    is_enable = Fields.BooleanProperty(default=True)
-    role = Fields.CategoryProperty(kind=role, required=True)
+    name = Fields.StringProperty(required=True, verbose_name=u"名稱")
+    account = Fields.StringProperty(required=True, verbose_name=u"帳號")
+    password = Fields.StringProperty(required=True, verbose_name=u"密碼")
+    avatar = Fields.ImageProperty(verbose_name=u"頭像")
+    is_enable = Fields.BooleanProperty(default=True, verbose_name=u"啟用")
+    role = Fields.CategoryProperty(kind=role, required=True, verbose_name=u"角色")
 
     @classmethod
     def init(cls, name, account, password, prohibited_actions, avatar):
