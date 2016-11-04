@@ -9,7 +9,7 @@
 from argeweb import BasicModel
 from argeweb import Fields
 from application_user_role_model import ApplicationUserRoleModel as role
-from ..libs.bcrypt import bcrypt
+from argeweb.libs.bcrypt import bcrypt
 
 
 class ApplicationUserModel(BasicModel):
