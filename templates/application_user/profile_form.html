@@ -35,7 +35,7 @@
                 <div class="row">
                     {% block form_fields %}
                     {% for field in form %}
-                    {% if not field.name in scaffolding.form_excluded_fields %}
+                    {% if not field.name in scaffolding.excluded_properties_in_from %}
                     {{ f.form_field(form, field) }}
                     {% endif %}
                     {% endfor %}
