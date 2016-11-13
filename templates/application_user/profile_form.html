@@ -6,7 +6,7 @@
 <div class="ibox-content m-b-sm border-bottom">
     <div class="p-xs">
         <div class="pull-left m-r-md">
-            <i class="fa fa-user text-navy mid-icon"></i>
+            <i class="material-icons mid-icon brand-text-color">account_circle</i>
         </div>
         <h2>個人資料</h2>
         <span>編輯或修改密碼。</span>
@@ -24,7 +24,7 @@
     {% block form_tag %}
     <form method="POST"
           action="{{scaffolding.form_action|default(uri(_pass_all=True), True)}}"
-          class="form-horizontal"
+          class="form-horizontal row"
           enctype="{{scaffolding.form_encoding|default('application/x-www-form-urlencoded', True)}}"
           role="form" accept-charset="UTF-8"
           target="iframeForm">
