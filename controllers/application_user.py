@@ -27,7 +27,7 @@ class ApplicationUser(Controller):
         prohibited_actions = settings.get("application_user_prohibited_actions", u"")
         from ...application_user import application_user_init
         application_user_init(u"管理員", "admin", "qwER12#$", prohibited_actions,
-                             "/plugins/backend_ui_material/static/img/profile_small.jpg")
+                             "plugins/backend_ui_material/static/images/users/avatar-001.jpg")
         return self.redirect("/")
 
     @route_menu(list_name=u"backend", text=u"帳號管理", sort=9700, icon="users", group=u"帳號管理")

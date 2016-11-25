@@ -33,6 +33,7 @@ plugins_helper = {
                 {"action": "edit", "name": u"編輯帳號"},
                 {"action": "view", "name": u"檢視帳號"},
                 {"action": "delete", "name": u"刪除帳號"},
+                {"action": "profile_form", "name": u"個人資料設定"},
             ]
         },
         "application_user_role": {

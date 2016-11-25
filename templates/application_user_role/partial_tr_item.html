@@ -23,7 +23,7 @@
         </td>
         {% endfor -%}
         <td class="text-right print-hide">
-            {% if uri_exists_with_permission(action='action_permissions') and application_user_level >= item.level %}<a href="{{uri_action_link('action_permissions', item)}}" class="btn btn-white btn-sm" target="aside_iframe"><i class="fa fa-shield"></i> 權限 </a>{% endif %}
+            {% if uri_exists_with_permission(action='action_permissions') and application_user_level >= item.level %}<a href="{{uri_action_link('action_permissions', item)}}" class="btn btn-white btn-sm" target="content_iframe"><i class="fa fa-shield"></i> 權限 </a>{% endif %}
         </td>
     </tr>
     {%- endif %}
