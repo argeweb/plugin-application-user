@@ -30,7 +30,7 @@ class ApplicationUser(Controller):
                              "plugins/backend_ui_material/static/images/users/avatar-001.jpg")
         return self.redirect("/")
 
-    @route_menu(list_name=u"backend", text=u"帳號管理", sort=9700, icon="users", group=u"帳號管理")
+    @route_menu(list_name=u"backend", text=u"帳號管理", sort=9901, icon="users", group=u"系統設定", need_hr_parent=True)
     def admin_list(self):
         self.context["application_user_key"] = self.application_user.key
         scaffold.list(self)

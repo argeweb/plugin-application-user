@@ -22,11 +22,11 @@ class ApplicationUserModel(BasicModel):
 
     @classmethod
     def init(cls, name, account, password, prohibited_actions, avatar):
-        su_role = role.get_or_create("super_monkey", u"超級管理員", 9999, prohibited_actions)
-        admin_role = role.get_or_create("super_user", u"管理員", 999, prohibited_actions)
+        su_role = role.get_or_create("super_user", u"超級管理員", 9999, prohibited_actions)
+        admin_role = role.get_or_create("administrator", u"管理員", 999, prohibited_actions)
         user_role = role.get_or_create("user", u"會員", 1, prohibited_actions)
         if cls.has_record() is False:
-            cls.create_account(u"猴子", "iammonkey", password, su_role.key, avatar)
+            cls.create_account(u"super_user", "super_user", password, su_role.key, avatar)
             return cls.create_account(name, account, password, admin_role.key, avatar)
         return None
 
@@ -58,7 +58,7 @@ class ApplicationUserModel(BasicModel):
 
     @classmethod
     def get_list(cls):
-        return cls.query(cls.account != "iammonkey").order(cls.account, -cls.sort, -cls._key)
+        return cls.query(cls.account != "super_user").order(cls.account, -cls.sort, -cls._key)
 
     def bycrypt_password(self):
         if self.old_password != self.new_password:

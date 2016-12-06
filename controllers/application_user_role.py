@@ -94,7 +94,7 @@ class ApplicationUserRole(Controller):
         self.context["item_key"] = key
         self.context["application_user_role"] = action_list
 
-    @route_menu(list_name=u"backend", text=u"角色管理", sort=9701, icon="users", group=u"帳號管理")
+    @route_menu(list_name=u"backend", text=u"角色管理", sort=9902, icon="users", group=u"系統設定")
     def admin_list(self):
         self.context["application_user_role"] = self.application_user.role
         return scaffold.list(self)
