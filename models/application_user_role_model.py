@@ -16,6 +16,7 @@ class ApplicationUserRoleModel(BasicModel):
     prohibited_actions = Fields.StringProperty(default="", verbose_name=u"禁止的操作")
     is_enable = Fields.BooleanProperty(default=True, verbose_name=u"啟用")
     level = Fields.IntegerProperty(default=0, verbose_name=u"權限等級")
+    menu = Fields.StringProperty(default=u"backend", verbose_name=u"後台選單名稱")
 
     @classmethod
     def create_role(cls, name, title, level, prohibited_actions):
