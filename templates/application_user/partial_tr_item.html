@@ -8,18 +8,18 @@
         {% if uri_exists_with_permission(action='delete') and (application_user_level >= item.level and application_user_key != item.key) %}data-delete-url="{{ uri_action_link('delete', item) }}"{% endif %}
         data-id="{{ print_key(item) }}">
         <td class="text-center sorting-mode move-headline">
-            {% if uri_exists_with_permission(action="sort_up") %}<a href="{{ uri_action_link('sort_up', item)}}" class="btn-json"><i class="icon icon-2x">keyboard_arrow_up</i></a>{% endif %}
+            {% if uri_exists_with_permission(action="sort_up") %}<a href="{{ uri_action_link('sort_up', item) }}" class="btn-json"><i class="icon icon-2x">keyboard_arrow_up</i></a>{% endif %}
             <i class="icon icon-2x">view_headline</i>
-            {% if uri_exists_with_permission(action="sort_down") %}<a href="{{ uri_action_link('sort_down', item)}}" class="btn-json"><i class="icon icon-2x">keyboard_arrow_down</i></a>{% endif %}
+            {% if uri_exists_with_permission(action="sort_down") %}<a href="{{ uri_action_link('sort_down', item) }}" class="btn-json"><i class="icon icon-2x">keyboard_arrow_down</i></a>{% endif %}
         </td>
         {% for property in scaffolding.display_properties_in_list -%}
         <td>{%- if property.find("is_") >= 0 %}
             <div class="checkbox checkbox-success">
                 <input type="checkbox" {% if item[property] %}checked{% endif %} id="{{ print_key(item) }}"
                        class="btn-checkbox-json">
-                <label for="{{ print_key(item) }}">{{s.scaffold_field_name("short_" + property)}}</label>
+                <label for="{{ print_key(item) }}">{{ s.scaffold_field_name("short_" + property) }}</label>
             </div>
-            {% else -%}{{print_value(item[property])}}{%- endif -%}
+            {% else -%}{{ print_value(item[property]) }}{%- endif -%}
         </td>
         {% endfor -%}
         <td class="text-right print-hide"></td>

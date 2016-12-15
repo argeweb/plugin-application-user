@@ -18,15 +18,15 @@
     <iframe name="iframeForm" width="0" height="0" frameborder="0" seamless></iframe>
     {% block form_tag %}
     <form method="POST"
-          action="{{scaffolding.form_action|default(uri(_pass_all=True), True)}}"
+          action="{{ scaffolding.form_action|default(uri(_pass_all=True), True) }}"
           class="form-horizontal row"
-          enctype="{{scaffolding.form_encoding|default('application/x-www-form-urlencoded', True)}}"
+          enctype="{{ scaffolding.form_encoding|default('application/x-www-form-urlencoded', True) }}"
           role="form" accept-charset="UTF-8"
           target="iframeForm">
         {% endblock %}
         <div class="col-sm-12 animated fadeInUp" style="margin-bottom: 30px;">
             <div class="ibox-content">
-                {{events.before_form_fields()}}
+                {{ events.before_form_fields() }}
                 <div class="row">
                     {% block form_fields %}
                     {% for field in form %}
@@ -45,7 +45,7 @@
                     </div>
                     {% endblock %}
                 </div>
-                {{events.after_form_fields()}}
+                {{ events.after_form_fields() }}
             </div>
             <input type="hidden" name="returnType" value="json" />
             <input type="hidden" name="routeAction" value="{{ route.action }}" />
