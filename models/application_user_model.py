@@ -62,9 +62,9 @@ class ApplicationUserModel(BasicModel):
 
     def bycrypt_password(self):
         if self.old_password != self.new_password:
-            self.password = u"" + bcrypt.hashpw(u"" + self.new_password, bcrypt.gensalt())
+            self.password = u'' + bcrypt.hashpw(u'' + self.new_password, bcrypt.gensalt())
             self.put()
 
     def bycrypt_password_for_add(self):
-        self.password = u"" + bcrypt.hashpw(u"" + self.password, bcrypt.gensalt())
+        self.password = u'' + bcrypt.hashpw(u'' + self.password, bcrypt.gensalt())
         self.put()

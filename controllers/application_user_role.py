@@ -35,7 +35,7 @@ class ApplicationUserRole(Controller):
         enable = self.params.get_string('enable', 'enable')
         if uri is '':
             return self.error(404)
-        role_prohibited_actions_list = str(role.prohibited_actions).split(",")
+        role_prohibited_actions_list = str(role.prohibited_actions).split(',')
         if enable == u'true':
             if uri in role_prohibited_actions_list:
                 role_prohibited_actions_list.remove(uri)
@@ -44,7 +44,7 @@ class ApplicationUserRole(Controller):
             if uri not in role_prohibited_actions_list:
                 role_prohibited_actions_list.append(uri)
             msg = u'已停用'
-        s = ",".join(role_prohibited_actions_list)
+        s = ','.join(role_prohibited_actions_list)
         role.prohibited_actions = s
         role.put()
         self.context['data'] = {
@@ -56,9 +56,9 @@ class ApplicationUserRole(Controller):
     def admin_action_permissions(self, key):
         def process_item(plugin, controller, item, action):
             for act in item['actions']:
-                uri = "admin:%s:%s" % (controller, act['action'])
-                act['uri'] = "plugins.%s.controllers.%s.%s" % (plugin, controller, act['action'])
-                act['checkbox_id'] = "plugins-%s-controllers-%s-%s" % (plugin, controller, act['action'])
+                uri = 'admin:%s:%s' % (controller, act['action'])
+                act['uri'] = 'plugins.%s.controllers.%s.%s' % (plugin, controller, act['action'])
+                act['checkbox_id'] = 'plugins-%s-controllers-%s-%s' % (plugin, controller, act['action'])
                 if act['uri'] in action:
                     act['enable'] = False
                 else:
@@ -132,7 +132,7 @@ class ApplicationUserRole(Controller):
                     parser.errors['level'] = u"您的權限等級 (%s) 低於設定值 (%s)，您無法設置比您高等級的值" % (self.application_user_level, change_level)
                     return False
                 if change_level > 1000 < self.application_user_level and target_level != 9999:
-                    parser.errors['level'] = u"權限等級最高為 999"
+                    parser.errors['level'] = u'權限等級最高為 999'
                     return False
                 if target_level == 9999 and change_level != 9999:
                     parser.errors['level'] = u'此權限等級無法變更'

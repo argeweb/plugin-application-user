@@ -22,13 +22,13 @@ class ApplicationUser(Controller):
         display_properties = ('name', 'account', 'is_enable', 'sort', 'created', 'modified')
         display_properties_in_list = ('name', 'account')
 
-    @route_with("/application_user_init")
+    @route_with('/application_user_init')
     def application_user_init(self):
-        prohibited_actions = settings.get('application_user_prohibited_actions', u"")
+        prohibited_actions = settings.get('application_user_prohibited_actions', u'')
         from ...application_user import application_user_init
         application_user_init(u'管理員', 'admin', "qwER12#$", prohibited_actions,
-                             "plugins/backend_ui_material/static/images/users/avatar-001.jpg")
-        return self.redirect("/")
+                             'plugins/backend_ui_material/static/images/users/avatar-001.jpg')
+        return self.redirect('/')
 
     @route_menu(list_name=u'backend', text=u'帳號管理', sort=9901, icon='users', group=u'系統設定', need_hr_parent=True)
     def admin_list(self):
@@ -61,7 +61,7 @@ class ApplicationUser(Controller):
         target_level = target.role.get().level
         if self.application_user_level < target_level:
             return self.abort(403)
-        change_password = u""
+        change_password = u''
         def scaffold_before_validate(**kwargs):
             parser = kwargs['parser']
             change_level = parser.data['role'].get().level
@@ -82,7 +82,7 @@ class ApplicationUser(Controller):
         return scaffold.edit(self, key)
 
     @csrf_protect
-    @route_with("/admin/application_user/profile")
+    @route_with('/admin/application_user/profile')
     def admin_profile(self):
         target = self.application_user
         target_level = target.role.get().level
