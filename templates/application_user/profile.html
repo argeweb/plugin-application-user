@@ -1,7 +1,18 @@
-{% extends "application_user/profile_form.html" %}
+{% extends "backend/form.html" %}
+{% block layout_header %}{% endblock %}
+{% block layout_before_content %}
+<div class="ibox-content m-b-sm border-bottom">
+    <div class="p-xs">
+        <div class="pull-left m-r-md">
+            <i class="fa fa-user text-navy mid-icon"></i>
+        </div>
+        <h2>個人資料</h2>
+        <span>編輯或修改密碼。</span>
+        {% if last_record_date %}<span class="text-muted small pull-right visible-sm visible-md visible-lg">最後更新：<i class="fa fa-clock-o"></i> {{ print_value(last_record_date) }}</span>{% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block form_tag_enctype %}{{ scaffolding.form_encoding|default('application/x-www-form-urlencoded', True) }}{% endblock %}
 {% block form_actions %}{% endblock %}
-{% block title_text %}編輯{% endblock %}
-{% block cancel_text %}取消{% endblock %}
-{% block submit_text %}儲存{% endblock %}
-{% block submit_text_f %}儲存{% endblock %}
-{% block submit_and_exit_text_f %}儲存後離開{% endblock %}
+{% block submit_text_f %}儲存個人資料{% endblock %}

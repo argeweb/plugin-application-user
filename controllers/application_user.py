@@ -91,6 +91,9 @@ class ApplicationUser(Controller):
         def scaffold_before_validate(**kwargs):
             parser = kwargs['parser']
             change_level = parser.data['role'].get().level
+            item = kwargs['item']
+            item.old_password = item.password
+            item.new_password = parser.data['password']
             def validate():
                 if  self.application_user_level < change_level:
                     parser.errors['role'] = u'您的權限等級低於此角色'

@@ -1,8 +1,5 @@
-{% import "backend/macros.html" as s with context %}
-{% extends s.layout() %}
-
-{% block layout_content %}
-{% set list = context[scaffolding.plural] %}
+{% extends "backend/form.html" %}
+{% block layout_before_content -%}
 <div class="ibox-content m-b-sm border-bottom">
     <div class="p-xs">
         <div class="pull-left m-r-md">
@@ -12,13 +9,16 @@
         <span>針對特定角色給與操作的權限。</span><br />
     </div>
 </div>
+{% endblock %}
 
+{% block layout_content %}
+{% set list = context[scaffolding.plural] %}
 <div class="wrapper wrapper-content" style="display: flex;flex-flow: row wrap;align-content: flex-start;align-items: stretch;margin: 0 -18px;justify-content: space-between">
 {#    <div class="row">#}
         {%- set n = 0 -%}
         {% for item in list %}
         {%- set n = n + 1 -%}
-        <div class="" style="flex: 0 0 23%;box-sizing: border-box; background: #fff; margin: 10px 0;flex-grow:1">
+        <div style="flex: 0 0 23%;box-sizing: border-box; background: #fff; margin: 10px 0;flex-grow:1">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
                     <h5>{{ item.group }}</h5>
@@ -43,8 +43,7 @@
 {#    </div>#}
 </div>
 {% endblock %}
-{% block layout_head -%}
-{%- endblock %}
+
 {% block layout_scripts -%}
     <script>
         $('.action-permissions-operations ul input[type=checkbox]').change(function() {
