@@ -46,7 +46,12 @@ class ApplicationUser(Controller):
                 if change_level > self.application_user_level:
                     parser.errors['role'] = u'您的權限等級低於此角色'
                     return False
-                return parser.container.validate() if parser.container else False
+                try:
+                    _validate = parser.container.validate()
+                    if _validate:
+                        return parser.container
+                except:
+                    return False
             parser.validate = validate
         def bycrypt_password(**kwargs):
             item = kwargs['item']
@@ -81,6 +86,16 @@ class ApplicationUser(Controller):
         self.events.scaffold_after_save += bycrypt_password
         return scaffold.edit(self, key)
 
+    def require_high_level_role(controller):
+        """
+        Authorization chain that validates the CSRF token.
+        """
+        if controller.request.method in ('POST', 'PUT') and not controller.request.path.startswith('/taskqueue'):
+            token = controller.session.get('_csrf_token')
+            if not token or str(token) != str(controller.request.get('csrf_token')):
+                return False, 'Cross-site request forgery failure'
+        return True
+
     @csrf_protect
     @route_with('/admin/application_user/profile')
     def admin_profile(self):
@@ -95,11 +110,16 @@ class ApplicationUser(Controller):
             item.old_password = item.password
             item.new_password = parser.data['password']
             def validate():
-                if  self.application_user_level < change_level:
+                if self.application_user_level < change_level:
                     parser.errors['role'] = u'您的權限等級低於此角色'
                     return False
-                return parser.container.validate() if parser.container else False
-            parser.validate = validate
+                try:
+                    _validate = parser.container.validate()
+                    if _validate:
+                        return parser.container
+                except:
+                    return False
+            # parser.validate = validate
         def bycrypt_password(**kwargs):
             item = kwargs['item']
             item.bycrypt_password()
