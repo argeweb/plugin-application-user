@@ -1,4 +1,6 @@
 {% extends "backend/form.html" %}
+{% block layout_header %}{% endblock %}
+
 {% block layout_before_content -%}
 <div class="ibox-content m-b-sm border-bottom">
     <div class="p-xs">
@@ -6,20 +8,20 @@
             <i class="material-icons mid-icon brand-text-color">lock</i>
         </div>
         <h2>角色權限管理 - {{ item.title }}</h2>
-        <span>針對特定角色給與操作的權限。</span><br />
+        <span>針對特定角色給與操作的權限。 </span><br />
     </div>
 </div>
 {% endblock %}
 
 {% block layout_content %}
 {% set list = context[scaffolding.plural] %}
-<div class="wrapper wrapper-content" style="display: flex;flex-flow: row wrap;align-content: flex-start;align-items: stretch;margin: 0 -18px;justify-content: space-between">
+<div class="wrapper wrapper-content" style="display: flex;flex-flow: row wrap;align-content: flex-start;align-items: stretch;justify-content: space-between">
 {#    <div class="row">#}
         {%- set n = 0 -%}
         {% for item in list %}
         {%- set n = n + 1 -%}
         <div style="flex: 0 0 23%;box-sizing: border-box; background: #fff; margin: 10px 0;flex-grow:1">
-            <div class="ibox float-e-margins">
+            <div class="ibox float-e-margins" style="box-shadow: none;">
                 <div class="ibox-title">
                     <h5>{{ item.group }}</h5>
                 </div>
@@ -45,14 +47,16 @@
 {% endblock %}
 
 {% block layout_scripts -%}
+    {% if uri_exists_with_permission(action="permissions_set_json", item=item) %}
     <script>
         $('.action-permissions-operations ul input[type=checkbox]').change(function() {
             var id = $(this).attr("id").replace("ro-field-", "");
             var val = $(this).is(":checked");
             console.log(id, val);
-            json("/admin/application_user_role/permissions_set.json", "role_key={{ item_key }}&uri=" + $(this).data("uri") + "&enable=" + val, function(data){
-                backend.message.quick_info(data.msg);
+            json("{{ uri_action_link('permissions_set_json') }}", "role_key={{ item_key }}&uri=" + $(this).data("uri") + "&enable=" + val, function(data){
+                backend.message.snackbar(data.msg);
             })
         });
     </script>
+    {% endif %}
 {%- endblock %}

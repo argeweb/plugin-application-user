@@ -23,8 +23,8 @@ class ApplicationUserRole(Controller):
         display_properties = ('title', 'name', 'level', 'is_enable', 'sort', 'created', 'modified')
         display_properties_in_list = ('title', 'name', 'level')
 
-    @route_with('/admin/application_user_role/permissions_set.json')
-    def admin_get_url(self):
+    @route
+    def admin_permissions_set_json(self):
         self.meta.change_view('json')
         role = self.params.get_ndb_record('role_key')
         if not role:
