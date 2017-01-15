@@ -97,7 +97,7 @@ class ApplicationUser(Controller):
         return True
 
     @csrf_protect
-    @route_with('/admin/application_user/profile')
+    @route
     def admin_profile(self):
         target = self.application_user
         target_level = target.role.get().level
