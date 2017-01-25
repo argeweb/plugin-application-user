@@ -20,8 +20,8 @@ class ApplicationUserRole(Controller):
         pagination_limit = 50
 
     class Scaffold:
-        display_properties = ('title', 'name', 'level', 'is_enable', 'sort', 'created', 'modified')
-        display_properties_in_list = ('title', 'name', 'level')
+        display_in_form = ('title', 'name', 'level', 'is_enable', 'sort', 'created', 'modified')
+        display_in_list = ('title', 'name', 'level')
 
     @route
     def admin_permissions_set_json(self):

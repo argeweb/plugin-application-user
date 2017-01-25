@@ -14,7 +14,7 @@
             <i class="icon icon-2x">view_headline</i>
             {% if uri_exists_with_permission(action="sort_down") %}<a href="{{ uri_action_link('sort_down', item) }}" class="btn-json"><i class="icon icon-2x">keyboard_arrow_down</i></a>{% endif %}
         </td>
-        {% for property in scaffolding.display_properties_in_list -%}
+        {% for property in scaffolding.display_in_list -%}
         <td>{%- if property.find("is_") >= 0 %}
             <div class="checkbox checkbox-success">
                 <input type="checkbox" {% if item[property] %}checked{% endif %} id="{{ print_key(item) }}"

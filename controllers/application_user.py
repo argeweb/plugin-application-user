@@ -19,8 +19,8 @@ class ApplicationUser(Controller):
         pagination_limit = 50
 
     class Scaffold:
-        display_properties = ('name', 'account', 'is_enable', 'sort', 'created', 'modified')
-        display_properties_in_list = ('name', 'account')
+        display_in_form = ('name', 'account', 'is_enable', 'sort', 'created', 'modified')
+        display_in_list = ('name', 'account')
 
     @route_with('/application_user_init')
     def application_user_init(self):
