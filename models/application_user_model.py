@@ -17,6 +17,7 @@ class ApplicationUserModel(BasicModel):
     name = Fields.StringProperty(required=True, verbose_name=u'名稱')
     account = Fields.StringProperty(required=True, verbose_name=u'帳號')
     password = Fields.StringProperty(required=True, verbose_name=u'密碼')
+    email = Fields.StringProperty(default=u'', verbose_name=u'E-Mail')
     avatar = Fields.ImageProperty(verbose_name=u'頭像')
     is_enable = Fields.BooleanProperty(default=True, verbose_name=u'啟用')
     role = Fields.CategoryProperty(kind=role, required=True, verbose_name=u'角色')
@@ -35,6 +36,21 @@ class ApplicationUserModel(BasicModel):
     def get_user(cls, account, password, is_enable=True):
         a = cls.query(
             cls.account == account,
+            cls.is_enable == is_enable).get()
+        if a is None:
+            return None
+        if bcrypt.hashpw(password, a.password) != a.password:
+            return None
+        if a.role is not None:
+            a_role = a.role.get()
+            if a_role is not None and a_role.is_enable is False:
+                return None
+        return a
+
+    @classmethod
+    def get_user_by_email(cls, email, password, is_enable=True):
+        a = cls.query(
+            cls.email == email,
             cls.is_enable == is_enable).get()
         if a is None:
             return None

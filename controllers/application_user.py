@@ -66,22 +66,25 @@ class ApplicationUser(Controller):
         target_level = target.role.get().level
         if self.application_user_level < target_level:
             return self.abort(403)
-        change_password = u''
+
         def scaffold_before_validate(**kwargs):
             parser = kwargs['parser']
             change_level = parser.data['role'].get().level
             item = kwargs['item']
             item.old_password = item.password
             item.new_password = parser.data['password']
+
             def validate():
                 if self.application_user_level < change_level:
                     parser.errors['role'] = u'您的權限等級低於此角色'
                     return False
                 return parser.container.validate() if parser.container else False
             parser.validate = validate
+
         def bycrypt_password(**kwargs):
             item = kwargs['item']
             item.bycrypt_password()
+
         self.events.scaffold_before_validate += scaffold_before_validate
         self.events.scaffold_after_save += bycrypt_password
         return scaffold.edit(self, key)
@@ -103,12 +106,14 @@ class ApplicationUser(Controller):
         target_level = target.role.get().level
         if self.application_user_level < target_level:
             return self.abort(403)
+
         def scaffold_before_validate(**kwargs):
             parser = kwargs['parser']
             change_level = parser.data['role'].get().level
             item = kwargs['item']
             item.old_password = item.password
             item.new_password = parser.data['password']
+
             def validate():
                 if self.application_user_level < change_level:
                     parser.errors['role'] = u'您的權限等級低於此角色'
@@ -120,9 +125,11 @@ class ApplicationUser(Controller):
                 except:
                     return False
             # parser.validate = validate
+
         def bycrypt_password(**kwargs):
             item = kwargs['item']
             item.bycrypt_password()
+
         self.events.scaffold_before_validate += scaffold_before_validate
         self.events.scaffold_after_save += bycrypt_password
         return scaffold.edit(self, self.application_user.key)
@@ -133,3 +140,52 @@ class ApplicationUser(Controller):
         if self.application_user_level < target_level:
             return self.abort(403)
         return scaffold.delete(self, key)
+
+    @route_with('/login.json')
+    def login_json(self):
+        self.meta.change_view('json')
+        self.context['data'] = {
+            'is_login': u'false'
+        }
+        if self.request.method != 'POST':
+            return
+        input_account = self.params.get_string('account')
+        input_password = self.params.get_string('password')
+        self.logging.info(input_account + input_password)
+        application_user = self.meta.Model.get_user(input_account, input_password)
+        if application_user is None:
+            if self.meta.Model.has_record():
+                return
+        self.session['application_user_key'] = application_user.key
+        self.context['data'] = {
+            'is_login': 'true'
+        }
+
+    @route_with('/login_by_email.json')
+    def login_email_json(self):
+        self.meta.change_view('json')
+        self.context['data'] = {
+            'is_login': u'false'
+        }
+        if self.request.method != 'POST':
+            return
+
+        input_email = self.params.get_string('email').strip()
+        input_password = self.params.get_string('password').strip()
+        if input_email == u'' or input_password == u'':
+            return
+
+        application_user = self.meta.Model.get_user_by_email(input_email, input_password)
+        if application_user is None:
+            if self.meta.Model.has_record():
+                return
+        self.session['application_user_key'] = application_user.key
+        self.context['data'] = {
+            'is_login': 'true'
+        }
+
+    @route_with('/logout')
+    def logout(self):
+        self.session['application_user_key'] = None
+        self.session['application_user_level'] = None
+        return self.redirect('/')
