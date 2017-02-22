@@ -161,8 +161,31 @@ class ApplicationUser(Controller):
             'is_login': 'true'
         }
 
-    @route_with('/login_by_email.json')
-    def login_email_json(self):
+    @route
+    def login_by_email_json(self):
+        self.meta.change_view('json')
+        self.context['data'] = {
+            'is_login': u'false'
+        }
+        if self.request.method != 'POST':
+            return
+
+        input_email = self.params.get_string('email').strip()
+        input_password = self.params.get_string('password').strip()
+        if input_email == u'' or input_password == u'':
+            return
+
+        application_user = self.meta.Model.get_user_by_email(input_email, input_password)
+        if application_user is None:
+            if self.meta.Model.has_record():
+                return
+        self.session['application_user_key'] = application_user.key
+        self.context['data'] = {
+            'is_login': 'true'
+        }
+
+    @route
+    def create_by_email_and_password_json(self):
         self.meta.change_view('json')
         self.context['data'] = {
             'is_login': u'false'
