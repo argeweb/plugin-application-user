@@ -81,6 +81,8 @@ class ApplicationUserModel(BasicModel):
         n.password = bcrypt.hashpw(password, bcrypt.gensalt())
         n.role = role.key
         n.avatar = avatar
+        if email:
+            n.email = email
         n.put()
         return n
 
@@ -89,7 +91,7 @@ class ApplicationUserModel(BasicModel):
         account = str(email).split('@')[0]
         if role is None:
             role = RoleModel.find_lowest_level()
-        return cls.create_account(account, account, password, role, None, email)
+        return cls.create_account(account, account, password, role, '/plugins/backend_ui_material/static/images/users/avatar-001.jpg', email)
 
     @classmethod
     def get_list(cls):

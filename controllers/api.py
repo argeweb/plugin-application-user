@@ -5,12 +5,14 @@
 # Author: Qi-Liang Wen (温啓良）
 # Web: http://www.yooliang.com/
 # Date: 2015/7/12.
-
+from datetime import datetime
 from argeweb import Controller, scaffold, route_menu, route_with, route, settings
 from argeweb.components.pagination import Pagination
 from argeweb.components.csrf import CSRF, csrf_protect
 from argeweb.components.search import Search
+from plugins.mail import Mail
 from ..models.application_user_model import ApplicationUserModel
+
 
 class Api(Controller):
     class Meta:
@@ -86,6 +88,16 @@ class Api(Controller):
             return
 
         application_user = self.meta.Model.create_account_by_email(input_email, input_password)
+
+        mail = Mail(self)
+        r = mail.send_width_template('notice_create_user_by_email', application_user.email, {
+            'site_name': self.host_information.site_name,
+            'name': application_user.name,
+            'email': application_user.email,
+            'created_date': self.util.localize_time(datetime.now()),
+            'domain': self.host_information.host,
+            'token': application_user.rest_password_token
+        })
         self.session['application_user_key'] = application_user.key
         self.context['message'] = u'註冊完成'
         self.context['data'] = {'create': 'success'}
@@ -138,18 +150,16 @@ class Api(Controller):
             self.context['message'] = u'查無此用戶'
             return
         try:
-            from plugins.mail import Mail
-            import datetime
             import random, string
             r = ''.join(random.choice(string.lowercase) for i in range(25))
             application_user.rest_password_token = u'%s-%s-%s-%s' % (r[0:4], r[5:9], r[10:14], r[15:19])
             application_user.put()
 
             mail = Mail(self)
-            r = mail.send_width_template('send_email_to_reset_password', application_user.email, {
+            r = mail.send_width_template('send_token_to_reset_password', application_user.email, {
                 'site_name': self.host_information.site_name,
                 'name': application_user.name,
-                'created_date': self.util.localize_time(datetime.datetime.now()),
+                'created_date': self.util.localize_time(datetime.now()),
                 'domain': self.host_information.host,
                 'token': application_user.rest_password_token
             })
