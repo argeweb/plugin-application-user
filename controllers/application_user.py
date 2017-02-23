@@ -20,6 +20,7 @@ class ApplicationUser(Controller):
 
     class Scaffold:
         display_in_form = ('name', 'account', 'is_enable', 'sort', 'created', 'modified')
+        hidden_in_form = ['rest_password_token']
         display_in_list = ('name', 'account')
 
     @route_with('/application_user_init')
@@ -55,7 +56,7 @@ class ApplicationUser(Controller):
             parser.validate = validate
         def bycrypt_password(**kwargs):
             item = kwargs['item']
-            item.bycrypt_password_for_add()
+            item.bycrypt_password()
         self.events.scaffold_before_validate += scaffold_before_validate
         self.events.scaffold_after_save += bycrypt_password
         return scaffold.add(self)
@@ -83,7 +84,7 @@ class ApplicationUser(Controller):
 
         def bycrypt_password(**kwargs):
             item = kwargs['item']
-            item.bycrypt_password()
+            item.bycrypt_password_with_old_password()
 
         self.events.scaffold_before_validate += scaffold_before_validate
         self.events.scaffold_after_save += bycrypt_password
@@ -102,6 +103,7 @@ class ApplicationUser(Controller):
     @csrf_protect
     @route
     def admin_profile(self):
+        self.context['change_view_to_view_function'] = ''
         target = self.application_user
         target_level = target.role.get().level
         if self.application_user_level < target_level:
@@ -128,7 +130,7 @@ class ApplicationUser(Controller):
 
         def bycrypt_password(**kwargs):
             item = kwargs['item']
-            item.bycrypt_password()
+            item.bycrypt_password_with_old_password()
 
         self.events.scaffold_before_validate += scaffold_before_validate
         self.events.scaffold_after_save += bycrypt_password
@@ -175,7 +177,7 @@ class ApplicationUser(Controller):
         if input_email == u'' or input_password == u'':
             return
 
-        application_user = self.meta.Model.get_user_by_email(input_email, input_password)
+        application_user = self.meta.Model.get_user_by_email_and_password(input_email, input_password)
         if application_user is None:
             if self.meta.Model.has_record():
                 return
@@ -198,7 +200,7 @@ class ApplicationUser(Controller):
         if input_email == u'' or input_password == u'':
             return
 
-        application_user = self.meta.Model.get_user_by_email(input_email, input_password)
+        application_user = self.meta.Model.get_user_by_email_and_password(input_email, input_password)
         if application_user is None:
             if self.meta.Model.has_record():
                 return

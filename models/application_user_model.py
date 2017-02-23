@@ -21,6 +21,7 @@ class ApplicationUserModel(BasicModel):
     avatar = Fields.ImageProperty(verbose_name=u'頭像')
     is_enable = Fields.BooleanProperty(default=True, verbose_name=u'啟用')
     role = Fields.CategoryProperty(kind=RoleModel, required=True, verbose_name=u'角色')
+    rest_password_token = Fields.StringProperty(verbose_name=u'重設密碼令牌', default=u'')
 
     @classmethod
     def init(cls, name, account, password, prohibited_actions, avatar):
@@ -48,10 +49,20 @@ class ApplicationUserModel(BasicModel):
         return a
 
     @classmethod
-    def get_user_by_email(cls, email, password, is_enable=True):
-        a = cls.query(
-            cls.email == email,
-            cls.is_enable == is_enable).get()
+    def get_user_by_email(cls, email, check_is_enable=False):
+        if check_is_enable:
+            return cls.query(cls.email == email, cls.is_enable==True).get()
+        return cls.query(cls.email == email).get()
+
+    @classmethod
+    def get_user_by_rest_password_token(cls, token, check_is_enable=True):
+        if check_is_enable:
+            return cls.query(cls.rest_password_token == token, cls.is_enable==True).get()
+        return cls.query(cls.rest_password_token == token).get()
+
+    @classmethod
+    def get_user_by_email_and_password(cls, email, password, check_is_enable=True):
+        a = cls.get_user_by_email(email, check_is_enable)
         if a is None:
             return None
         if bcrypt.hashpw(password, a.password) != a.password:
@@ -61,13 +72,6 @@ class ApplicationUserModel(BasicModel):
             if a_role is not None and a_role.is_enable is False:
                 return None
         return a
-
-    @classmethod
-    def check_user_by_email(cls, email):
-        a = cls.query(cls.email == email).get()
-        if a is None:
-            return False
-        return True
 
     @classmethod
     def create_account(cls, name, account, password, role, avatar=None, email=None):
@@ -91,11 +95,11 @@ class ApplicationUserModel(BasicModel):
     def get_list(cls):
         return cls.query(cls.account != 'super_user').order(cls.account, -cls.sort, -cls._key)
 
-    def bycrypt_password(self):
+    def bycrypt_password_with_old_password(self):
         if self.old_password != self.new_password:
             self.password = u'' + bcrypt.hashpw(u'' + self.new_password, bcrypt.gensalt())
             self.put()
 
-    def bycrypt_password_for_add(self):
+    def bycrypt_password(self):
         self.password = u'' + bcrypt.hashpw(u'' + self.password, bcrypt.gensalt())
         self.put()

@@ -1,10 +1,9 @@
-{% extends "backend/form.html" %}
-{% block layout_header %}{% endblock %}
+{% extends "backend/config.html" %}
 {% block layout_before_content %}
 <div class="ibox-content m-b-sm border-bottom">
     <div class="p-xs">
         <div class="pull-left m-r-md">
-            <i class="fa fa-user text-navy mid-icon"></i>
+            <i class="material-icons mid-icon brand-text-color">account_box</i>
         </div>
         <h2>個人資料</h2>
         <span>編輯或修改密碼。</span>
@@ -13,5 +12,4 @@
 </div>
 {% endblock %}
 
-{% block form_actions %}{% endblock %}
 {% block submit_text_f %}儲存個人資料{% endblock %}
