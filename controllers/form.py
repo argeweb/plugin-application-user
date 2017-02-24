@@ -14,7 +14,7 @@ from plugins.mail import Mail
 from ..models.application_user_model import ApplicationUserModel
 
 
-class Api(Controller):
+class Form(Controller):
     class Meta:
         components = (scaffold.Scaffolding, Pagination, Search, CSRF)
         pagination_actions = ('list',)
@@ -27,7 +27,8 @@ class Api(Controller):
         display_in_list = ('name', 'account')
 
     @route
-    def login(self):
+    @route_with(name='form:user:login_by_account')
+    def login_by_account(self):
         self.context['data'] = {'is_login': 'false'}
         if self.request.method != 'POST':
             return
@@ -46,6 +47,7 @@ class Api(Controller):
         self.context['data'] = {'is_login': 'true'}
 
     @route
+    @route_with(name='form:user:login_by_email')
     def login_by_email(self):
         self.context['data'] = {'is_login': 'false'}
         if self.request.method != 'POST':
@@ -65,6 +67,7 @@ class Api(Controller):
         self.context['data'] = {'is_login': 'true'}
 
     @route
+    @route_with(name='form:user:create_by_email_and_password')
     def create_by_email_and_password(self):
         self.context['data'] = {'create': 'failure'}
         if self.request.method != 'POST':
@@ -103,6 +106,7 @@ class Api(Controller):
         self.context['data'] = {'create': 'success'}
 
     @route
+    @route_with(name='form:user:reset_password_with_token')
     def reset_password_with_token(self):
         input_token = self.params.get_string('token').strip()
         input_password = self.params.get_string('password').strip()
@@ -133,6 +137,7 @@ class Api(Controller):
         self.context['message'] = u'密碼已重新設置'
 
     @route
+    @route_with(name='form:user:send_email_to_reset_password')
     def send_email_to_reset_password(self):
         self.context['data'] = {'send_email': 'failure'}
 
@@ -175,6 +180,7 @@ class Api(Controller):
             self.context['message'] = u'郵件寄送時發生錯誤了'
 
     @route
+    @route_with(name='form:user:logout')
     def logout(self):
         self.session['application_user_key'] = None
         self.session['application_user_level'] = None
