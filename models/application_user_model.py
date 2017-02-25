@@ -20,7 +20,6 @@ class ApplicationUserModel(BasicModel):
     email = Fields.StringProperty(default=u'', verbose_name=u'E-Mail')
     avatar = Fields.ImageProperty(verbose_name=u'頭像')
     is_enable = Fields.BooleanProperty(default=True, verbose_name=u'啟用')
-    role = Fields.CategoryProperty(kind=RoleModel, required=True, verbose_name=u'角色')
     rest_password_token = Fields.StringProperty(verbose_name=u'重設密碼令牌', default=u'')
 
     @classmethod

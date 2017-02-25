@@ -29,9 +29,9 @@ class Form(Controller):
     @route
     @route_with(name='form:user:login_by_account')
     def login_by_account(self):
-        self.context['data'] = {'is_login': 'false'}
+        self.context['data'] = {'result': 'failure'}
         if self.request.method != 'POST':
-            return
+            return self.abort(404)
 
         input_account = self.params.get_string('account')
         input_password = self.params.get_string('password')
@@ -44,14 +44,15 @@ class Form(Controller):
                 return
 
         self.session['application_user_key'] = application_user.key
-        self.context['data'] = {'is_login': 'true'}
+        self.context['data'] = {'result': 'true'}
+
 
     @route
     @route_with(name='form:user:login_by_email')
     def login_by_email(self):
-        self.context['data'] = {'is_login': 'false'}
+        self.context['data'] = {'result': 'failure'}
         if self.request.method != 'POST':
-            return
+            return self.abort(404)
 
         input_email = self.params.get_string('email').strip()
         input_password = self.params.get_string('password').strip()
@@ -64,15 +65,14 @@ class Form(Controller):
                 return
 
         self.session['application_user_key'] = application_user.key
-        self.context['data'] = {'is_login': 'true'}
+        self.context['data'] = {'result': 'true'}
 
     @route
     @route_with(name='form:user:create_by_email_and_password')
     def create_by_email_and_password(self):
-        self.context['data'] = {'create': 'failure'}
+        self.context['data'] = {'result': 'failure'}
         if self.request.method != 'POST':
-            self.context['message'] = u'只接受 Post 的資料'
-            return
+            return self.abort(404)
 
         input_email = self.params.get_string('email').strip()
         input_password = self.params.get_string('password').strip()
@@ -103,7 +103,7 @@ class Form(Controller):
         })
         self.session['application_user_key'] = application_user.key
         self.context['message'] = u'註冊完成'
-        self.context['data'] = {'create': 'success'}
+        self.context['data'] = {'result': 'success'}
 
     @route
     @route_with(name='form:user:reset_password_with_token')
@@ -111,7 +111,7 @@ class Form(Controller):
         input_token = self.params.get_string('token').strip()
         input_password = self.params.get_string('password').strip()
         input_confirm_password = self.params.get_string('confirm_password').strip()
-        self.context['data'] = {'reset_password': 'failure'}
+        self.context['data'] = {'result': 'failure'}
         if input_token == u'':
             self.context['message'] = u'請重新產生 token'
             return
@@ -133,17 +133,15 @@ class Form(Controller):
         application_user.password = input_password
         application_user.bycrypt_password()
         application_user.put()
-        self.context['data'] = {'reset_password': 'success'}
+        self.context['data'] = {'result': 'success'}
         self.context['message'] = u'密碼已重新設置'
 
     @route
     @route_with(name='form:user:send_email_to_reset_password')
     def send_email_to_reset_password(self):
-        self.context['data'] = {'send_email': 'failure'}
-
+        self.context['data'] = {'result': 'failure'}
         if self.request.method != 'POST':
-            self.context['message'] = u'只接受 Post 的資料'
-            return
+            return self.abort(404)
 
         input_email = self.params.get_string('email').strip()
         if input_email == u'':
@@ -169,7 +167,7 @@ class Form(Controller):
                 'token': application_user.rest_password_token
             })
             if r['status'] == 'success':
-                self.context['data'] = {'send_email': 'success'}
+                self.context['data'] = {'result': 'success'}
                 self.context['message'] = u'密碼重置郵件已寄出'
             else:
                 self.context['data'] = {'send_email': r['status']}
@@ -182,9 +180,10 @@ class Form(Controller):
     @route
     @route_with(name='form:user:logout')
     def logout(self):
+        if self.request.method != 'POST':
+            return self.abort(404)
         self.session['application_user_key'] = None
         self.session['application_user_level'] = None
         self.context['data'] = {
-            'is_login': u'false',
-            'logout': 'success'
+            'result': 'success'
         }
