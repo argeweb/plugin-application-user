@@ -65,7 +65,7 @@ class Form(Controller):
                 return
 
         self.session['application_user_key'] = application_user.key
-        self.context['data'] = {'result': 'true'}
+        self.context['data'] = {'result': 'success'}
 
     @route
     @route_with(name='form:user:create_by_email_and_password')

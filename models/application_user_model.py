@@ -21,6 +21,7 @@ class ApplicationUserModel(BasicModel):
     avatar = Fields.ImageProperty(verbose_name=u'頭像')
     is_enable = Fields.BooleanProperty(default=True, verbose_name=u'啟用')
     rest_password_token = Fields.StringProperty(verbose_name=u'重設密碼令牌', default=u'')
+    role = Fields.CategoryProperty(verbose_name=u'角色', kind=RoleModel)
 
     @classmethod
     def init(cls, name, account, password, prohibited_actions, avatar):

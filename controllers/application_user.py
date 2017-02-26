@@ -19,7 +19,7 @@ class ApplicationUser(Controller):
         pagination_limit = 50
 
     class Scaffold:
-        display_in_form = ('name', 'account', 'is_enable', 'sort', 'created', 'modified')
+        display_in_form = ('name', 'account', 'is_enable', 'sort', 'created', 'modified', 'role')
         hidden_in_form = ['rest_password_token']
         display_in_list = ('name', 'account')
 
