@@ -1,13 +1,27 @@
 {% extends "backend/list_layout.html" %}
+{% block partial_thead_tr %}
+    <th data-field="sortable" class="sorting-mode text-center srot-filed" style="width: 100px;">排序</th>
+    {% for property in scaffolding.display_in_list -%}
+        <th data-field="{{ property }}" class="text-center">{{ s.scaffold_field_name(property) }}</th>
+    {% endfor -%}
+    <th data-field="op" class="sorting-mode text-center srot-filed">權限</th>
+{% endblock %}
+
+{# 權限 #}
+{% macro check_permission_url(action, item) -%}
+    {% if action == "view" %}{% if uri_exists_with_permission(action="view", item=item) %}data-view-url="{{ uri_action_link('view', item) }}"{% endif %}{% endif %}
+    {% if action == "edit" %}{% if uri_exists_with_permission(action='edit', item=item) and application_user_level >= item.level %}data-edit-url="{{ uri_action_link('edit', item) }}"{% endif %}{% endif %}
+    {% if action == "delete" %}{% if uri_exists_with_permission(action='delete', item=item) and application_user_level > item.level and application_user_key != item.key %}data-delete-url="{{ uri_action_link('delete', item) }}"{% endif %}{% endif %}
+{%- endmacro %}
 
 {% block partial_tr_item %}
 {%- set list = context[scaffolding.plural] -%}
 {% for item in list %}
     {% if item.level < 1000 or (application_user_level > 1000 and item.level > 1000) -%}
     <tr id="node_{{ item.sort }}" class="record_item"
-        {% if uri_exists_with_permission(action="view", item=item) %}data-view-url="{{ uri_action_link('view', item) }}"{% endif %}
-        {% if uri_exists_with_permission(action='edit', item=item) and application_user_level >= item.level %}data-edit-url="{{ uri_action_link('edit', item) }}"{% endif %}
-        {% if uri_exists_with_permission(action='delete', item=item) and application_user_level >= item.level and application_user_role != item.key %}data-delete-url="{{ uri_action_link('delete', item) }}"{% endif %}
+        {{ check_permission_url("view", item) }}
+        {{ check_permission_url("edit", item) }}
+        {{ check_permission_url("delete", item) }}
         data-id="{{ print_key(item) }}">
         <td class="text-center sorting-mode move-headline">
             {% if uri_exists_with_permission(action="sort_up", item=item) %}<a href="{{ uri_action_link('sort_up', item) }}" class="btn-json"><i class="icon icon-2x">keyboard_arrow_up</i></a>{% endif %}
