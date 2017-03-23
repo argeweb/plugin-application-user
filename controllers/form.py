@@ -44,7 +44,7 @@ class Form(Controller):
                 return
 
         self.session['application_user_key'] = application_user.key
-        self.context['data'] = {'result': 'true'}
+        self.context['data'] = {'result': 'success'}
 
 
     @route
