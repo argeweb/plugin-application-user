@@ -19,7 +19,7 @@ class ApplicationUser(Controller):
         pagination_limit = 50
 
     class Scaffold:
-        display_in_form = ('name', 'account', 'is_enable', 'sort', 'created', 'modified', 'role')
+        display_in_form = ('name', 'account', 'is_enable', 'sort', 'created', 'modified')
         hidden_in_form = ['rest_password_token']
         display_in_list = ('name', 'account')
 
@@ -34,9 +34,10 @@ class ApplicationUser(Controller):
     @route_menu(list_name=u'backend', text=u'帳號管理', sort=9801, icon='users', group=u'帳號管理', need_hr_parent=True)
     def admin_list(self):
         self.context['application_user_key'] = self.application_user.key
+        self.context['application_user_level'] = self.application_user.get_role_level()
         scaffold.list(self)
         for item in self.context[self.scaffold.plural]:
-            item.level = item.role.get().level
+            item.level = item.get_role_level()
 
     @csrf_protect
     def admin_add(self):
@@ -64,19 +65,19 @@ class ApplicationUser(Controller):
     @csrf_protect
     def admin_edit(self, key):
         target = self.util.decode_key(key).get()
-        target_level = target.role.get().level
+        target_level = target.get_role_level()
+        self.application_user_level = self.application_user.get_role_level()
         if self.application_user_level < target_level:
             return self.abort(403)
 
         def scaffold_before_validate(**kwargs):
             parser = kwargs['parser']
-            change_level = parser.data['role'].get().level
             item = kwargs['item']
             item.old_password = item.password
             item.new_password = parser.data['password']
 
             def validate():
-                if self.application_user_level < change_level:
+                if self.application_user_level < target_level:
                     parser.errors['role'] = u'您的權限等級低於此角色'
                     return False
                 return parser.container.validate() if parser.container else False
@@ -104,11 +105,6 @@ class ApplicationUser(Controller):
     @route
     def admin_profile(self):
         self.context['change_view_to_view_function'] = ''
-        target = self.application_user
-        target_level = target.role.get().level
-        if self.application_user_level < target_level:
-            return self.abort(403)
-
         def scaffold_before_validate(**kwargs):
             parser = kwargs['parser']
             change_level = parser.data['role'].get().level
@@ -138,7 +134,7 @@ class ApplicationUser(Controller):
 
     def admin_delete(self, key):
         target = self.util.decode_key(key).get()
-        target_level = target.role.get().level
+        target_level = target.get_role_level
         if self.application_user_level < target_level:
             return self.abort(403)
         return scaffold.delete(self, key)

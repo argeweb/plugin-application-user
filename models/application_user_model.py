@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+    #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # Created with YooLiang Technology (侑良科技).
@@ -8,7 +8,7 @@
 
 from argeweb import BasicModel
 from argeweb import Fields
-from application_user_role_model import ApplicationUserRoleModel as RoleModel
+from role_model import RoleModel as RoleModel
 from argeweb.libs.bcrypt import bcrypt
 from argeweb.libs.wtforms.validators import InputRequired
 
@@ -21,17 +21,6 @@ class ApplicationUserModel(BasicModel):
     avatar = Fields.ImageProperty(verbose_name=u'頭像')
     is_enable = Fields.BooleanProperty(default=True, verbose_name=u'啟用')
     rest_password_token = Fields.StringProperty(verbose_name=u'重設密碼令牌', default=u'')
-    role = Fields.CategoryProperty(verbose_name=u'角色', kind=RoleModel)
-
-    @classmethod
-    def init(cls, name, account, password, prohibited_actions, avatar):
-        su_role = RoleModel.get_or_create('super_user', u'超級管理員', 9999, prohibited_actions)
-        admin_role = RoleModel.get_or_create('administrator', u'管理員', 999, prohibited_actions)
-        user_role = RoleModel.get_or_create('user', u'會員', 1, prohibited_actions)
-        if cls.has_record() is False:
-            cls.create_account(u'super_user', 'super_user', password, su_role, avatar)
-            return cls.create_account(name, account, password, admin_role, avatar)
-        return None
 
     @classmethod
     def get_user(cls, account, password, is_enable=True):
@@ -42,10 +31,6 @@ class ApplicationUserModel(BasicModel):
             return None
         if bcrypt.hashpw(password, a.password) != a.password:
             return None
-        if a.role is not None:
-            a_role = a.role.get()
-            if a_role is not None and a_role.is_enable is False:
-                return None
         return a
 
     @classmethod
@@ -67,19 +52,14 @@ class ApplicationUserModel(BasicModel):
             return None
         if bcrypt.hashpw(password, a.password) != a.password:
             return None
-        if a.role is not None:
-            a_role = a.role.get()
-            if a_role is not None and a_role.is_enable is False:
-                return None
         return a
 
     @classmethod
-    def create_account(cls, name, account, password, role, avatar=None, email=None):
+    def create_account(cls, name, account, password, avatar=None, email=None):
         n = cls()
         n.name = name
         n.account = account
         n.password = bcrypt.hashpw(password, bcrypt.gensalt())
-        n.role = role.key
         n.avatar = avatar
         if email:
             n.email = email
@@ -91,7 +71,10 @@ class ApplicationUserModel(BasicModel):
         account = str(email).split('@')[0]
         if role is None:
             role = RoleModel.find_lowest_level()
-        return cls.create_account(account, account, password, role, '/plugins/backend_ui_material/static/images/users/avatar-001.jpg', email)
+        user = cls.create_account(account, account, password, '/plugins/backend_ui_material/static/images/users/avatar-001.jpg', email)
+        from ..models.user_role_model import UserRoleModel
+        UserRoleModel.set_role(user, role)
+        return user
 
     @classmethod
     def get_list(cls):
@@ -105,3 +88,50 @@ class ApplicationUserModel(BasicModel):
     def bycrypt_password(self):
         self.password = u'' + bcrypt.hashpw(u'' + self.password, bcrypt.gensalt())
         self.put()
+
+    @property
+    def roles(self):
+        if not hasattr(self, '_roles'):
+            from user_role_model import UserRoleModel
+            self._roles = UserRoleModel.get_user_roles(self).fetch()
+        return self._roles
+
+    def get_role_level(self, highest=True):
+        level = 0
+        for r in self.roles:
+            r_level = r.role.get().level
+            if r_level > level:
+                level = r_level
+        return level
+
+    def check_and_get_role(self, role):
+        from user_role_model import UserRoleModel
+        role = UserRoleModel.get_role(role)
+        if len(self.roles) > 0:
+            for item in self.roles:
+                if item.key == role.key:
+                    return role
+            return None
+        else:
+            if UserRoleModel.is_in_role(self, role):
+                return role
+            return None
+
+    def has_permission(self, action_full_name, strict=False):
+        if len(self.roles) == 0:
+            return False
+        not_in_count = 0
+        if not hasattr(self, '_roles_object'):
+            self._roles_object = []
+            for item in self.roles:
+                r = item.role.get()
+                if r:
+                    self._roles_object.append(r)
+        for item in self._roles_object:
+            if action_full_name not in item.prohibited_actions:
+                not_in_count += 1
+                if strict is False:
+                    break
+        if strict:
+            return (not_in_count > 0) and (len(self.roles) == not_in_count)
+        return not_in_count > 0

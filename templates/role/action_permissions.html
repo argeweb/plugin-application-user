@@ -1,5 +1,7 @@
 {% extends "backend/form.html" %}
 
+{% block layout_header -%}
+{% endblock %}
 {% block layout_before_content -%}
 <div class="ibox-content m-b-sm border-bottom">
     <div class="p-xs">
@@ -53,7 +55,7 @@
             var val = $(this).is(":checked");
             console.log(id, val);
             json("{{ uri_action_link('permissions_set_json') }}", "role_key={{ item_key }}&uri=" + $(this).data("uri") + "&enable=" + val, function(data){
-                backend.message.snackbar(data.msg);
+                message.snackbar(data.message);
             })
         });
     </script>

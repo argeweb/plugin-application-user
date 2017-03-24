@@ -6,13 +6,13 @@
 # Web: http://www.yooliang.com/
 # Date: 2015/7/12.
 
-from .models.application_user_model import ApplicationUserModel
+from .models.user_role_model import UserRoleModel, ApplicationUserModel
 
 
 get_user = ApplicationUserModel.get_user
 has_record = ApplicationUserModel.has_record
 create_account = ApplicationUserModel.create_account
-application_user_init = ApplicationUserModel.init
+application_user_init = UserRoleModel.init
 
 __all__ = (
     'get_user',
@@ -36,7 +36,7 @@ plugins_helper = {
                 {'action': 'profile', 'name': u'個人資料設定'},
             ]
         },
-        'application_user_role': {
+        'role': {
             'group': u'後台角色管理',
             'actions': [
                 {'action': 'list', 'name': u'角色管理'},
@@ -45,6 +45,16 @@ plugins_helper = {
                 {'action': 'view', 'name': u'檢視角色'},
                 {'action': 'delete', 'name': u'刪除角色'},
                 {'action': 'action_permissions', 'name': u'權限設定'}
+            ]
+        },
+        'user_role': {
+            'group': u'帳號角色管理',
+            'actions': [
+                {'action': 'list', 'name': u'帳號角色管理'},
+                {'action': 'add', 'name': u'新增帳號角色關連'},
+                {'action': 'edit', 'name': u'編輯帳號角色關連'},
+                {'action': 'view', 'name': u'檢視帳號角色關連'},
+                {'action': 'delete', 'name': u'刪除帳號角色關連'},
             ]
         }
     }
