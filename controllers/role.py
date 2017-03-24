@@ -102,6 +102,7 @@ class Role(Controller):
 
     @csrf_protect
     def admin_add(self):
+        self.application_user_level = self.application_user.get_role_level()
         def scaffold_before_validate(**kwargs):
             parser = kwargs['parser']
             change_level = self.params.get_integer('level')
@@ -119,6 +120,7 @@ class Role(Controller):
     def admin_edit(self, key, *args):
         target = self.util.decode_key(key).get()
         target_level = target.level
+        self.application_user_level = self.application_user.get_role_level()
         if self.application_user_level < target_level:
             return self.abort(403)
 
@@ -149,6 +151,7 @@ class Role(Controller):
 
     def admin_delete(self, key):
         target = self.util.decode_key(key).get()
+        self.application_user_level = self.application_user.get_role_level()
         target_level = target.level
         if self.application_user_level< target_level:
             return self.abort(403)

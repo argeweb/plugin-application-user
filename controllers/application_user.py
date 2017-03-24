@@ -113,9 +113,6 @@ class ApplicationUser(Controller):
             item.new_password = parser.data['password']
 
             def validate():
-                if self.application_user_level < change_level:
-                    parser.errors['role'] = u'您的權限等級低於此角色'
-                    return False
                 try:
                     _validate = parser.container.validate()
                     if _validate:
@@ -134,6 +131,7 @@ class ApplicationUser(Controller):
 
     def admin_delete(self, key):
         target = self.util.decode_key(key).get()
+        self.application_user_level = self.application_user.get_role_level()
         target_level = target.get_role_level
         if self.application_user_level < target_level:
             return self.abort(403)
@@ -208,5 +206,4 @@ class ApplicationUser(Controller):
     @route_with('/logout')
     def logout(self):
         self.session['application_user_key'] = None
-        self.session['application_user_level'] = None
         return self.redirect('/')
