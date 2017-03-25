@@ -27,14 +27,14 @@ class UserRoleModel(BasicModel):
         admin_role = RoleModel.get_or_create('administrator', u'管理員', 999, prohibited_actions)
         user_role = RoleModel.get_or_create('user', u'會員', 1, prohibited_actions)
         if ApplicationUserModel.has_record():
-            items = ApplicationUserModel.query().order(ApplicationUserModel.sort).fetch(limit=3)
-            for item in items:
-                cls.set_role(item, su_role)
-                cls.set_role(item, admin_role)
+            su = ApplicationUserModel.find_by_name(u'super_user')
+            admin = ApplicationUserModel.find_by_name(name)
         else:
             su = ApplicationUserModel.create_account(u'super_user', 'super_user', password, avatar)
             admin = ApplicationUserModel.create_account(name, account, password, avatar)
+        if su:
             cls.set_role(su, su_role)
+        if admin:
             cls.set_role(admin, admin_role)
 
     @classmethod

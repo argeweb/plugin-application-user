@@ -16,8 +16,6 @@ from argeweb.components.search import Search
 class UserRole(Controller):
     class Meta:
         components = (scaffold.Scaffolding, Pagination, Search, CSRF)
-        pagination_actions = ('list',)
-        pagination_limit = 50
 
     class Scaffold:
         display_in_form = ('name', 'user', 'role')
