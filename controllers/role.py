@@ -20,7 +20,7 @@ class Role(Controller):
     class Scaffold:
         display_in_form = ('title', 'name', 'level')
         display_in_list = ('title', 'name', 'level')
-        hidden_in_form = ('prohibited_actions')
+        hidden_in_form = ['prohibited_actions']
 
     @route
     def admin_permissions_set_json(self):
@@ -148,6 +148,7 @@ class Role(Controller):
 
     def admin_view(self, key):
         self.application_user_level = self.application_user.get_role_level()
+        self.context['application_user_level'] = self.application_user_level
         return scaffold.view(self, key)
 
     def admin_delete(self, key):

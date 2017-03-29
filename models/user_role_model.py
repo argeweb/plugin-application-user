@@ -13,7 +13,7 @@ from role_model import RoleModel
 
 
 class UserRoleModel(BasicModel):
-    name = Fields.StringProperty(required=True, verbose_name=u'識別名稱')
+    name = Fields.HiddenProperty(verbose_name=u'識別名稱')
     user = Fields.KeyProperty(verbose_name=u'使用者', kind=ApplicationUserModel)
     user_name = Fields.SearchingHelperProperty(verbose_name=u'使用者名稱', target='user', target_field_name='name')
     user_account = Fields.SearchingHelperProperty(verbose_name=u'使用者帳號', target='user', target_field_name='account')

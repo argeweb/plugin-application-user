@@ -1,6 +1,25 @@
 {% import "backend/macros.html" as s with context %}
 {%- if scaffolding -%}
-    <div class="dropdown list-operations related-operations hide">
+    {%- if route.action == 'add' -%}
+        {% set submit_text ="建立" %}
+        {% set submit_and_exit_text ="建立並離開" %}
+        {% set submit_and_reload_record ="建立並繼續編輯" %}
+    {% else %}
+        {% set submit_text ="儲存" %}
+        {% set submit_and_exit_text ="儲存並離開" %}
+    {% endif %}
+    <a href="javascript: history.go(-1);" class="btn btn-white btn-display-in-iframe"><i class="icon">keyboard_backspace</i> 回上一頁</a>
+    <div class="btn-group">
+        {%- if route.action != 'view' -%}
+        <a href="javascript: saveForm();" class="btn btn-white"><i class="icon">save</i> {{ submit_text }}</a>
+        <a href="javascript: saveFormAndGoBack();" class="btn btn-white"><i class="icon">save</i> {{ submit_and_exit_text }}</a>
+        {% endif %}
+        {%- if route.action == 'add' -%}
+        <a href="javascript: saveFormAndReloadRecord();" class="btn btn-white"><i class="icon">save</i> {{ submit_and_reload_record }}</a>
+        {% endif %}
+    </div>
+
+    <div class="dropdown list-operations related-operations hide pull-right">
         <a class="dropdown-toggle text-black waves-attach padding-left-no padding-right-no waves-effect btn btn-white"
            data-toggle="dropdown">
             <span><i class="icon icon-lg">arrow_drop_down</i></span>

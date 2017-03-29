@@ -19,7 +19,7 @@ class ApplicationUser(Controller):
     class Scaffold:
         display_in_form = ('name', 'account', 'is_enable', 'sort', 'created', 'modified')
         hidden_in_form = ['rest_password_token']
-        display_in_list = ('name', 'account')
+        display_in_list = ('name', 'account', 'email', 'is_enable', 'created')
 
     @route_with('/application_user_init')
     def application_user_init(self):
@@ -39,24 +39,9 @@ class ApplicationUser(Controller):
 
     @csrf_protect
     def admin_add(self):
-        def scaffold_before_validate(**kwargs):
-            parser = kwargs['parser']
-            change_level = parser.data['role'].get().level
-            def validate():
-                if change_level > self.application_user_level:
-                    parser.errors['role'] = u'您的權限等級低於此角色'
-                    return False
-                try:
-                    _validate = parser.container.validate()
-                    if _validate:
-                        return parser.container
-                except:
-                    return False
-            parser.validate = validate
         def bycrypt_password(**kwargs):
             item = kwargs['item']
             item.bycrypt_password()
-        self.events.scaffold_before_validate += scaffold_before_validate
         self.events.scaffold_after_save += bycrypt_password
         return scaffold.add(self)
 
