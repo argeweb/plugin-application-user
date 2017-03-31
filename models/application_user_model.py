@@ -117,6 +117,10 @@ class ApplicationUserModel(BasicModel):
                 return role
             return None
 
+    def is_in_role(self, role):
+        from user_role_model import UserRoleModel
+        return UserRoleModel.is_in_role(self, role)
+
     def has_permission(self, action_full_name, strict=False):
         if len(self.roles) == 0:
             return False

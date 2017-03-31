@@ -8,7 +8,7 @@
         {% set submit_text ="儲存" %}
         {% set submit_and_exit_text ="儲存並離開" %}
     {% endif %}
-    <a href="javascript: history.go(-1);" class="btn btn-white btn-display-in-iframe"><i class="icon">keyboard_backspace</i> 回上一頁</a>
+    <a href="javascript: history.go(-1);" class="btn btn-white btn-display-in-iframe"><i class="icon">keyboard_backspace</i><span class="hidden-xs"> 回上一頁</span></a>
     <div class="btn-group">
         {%- if route.action != 'view' -%}
         <a href="javascript: saveForm();" class="btn btn-white"><i class="icon">save</i> {{ submit_text }}</a>
@@ -23,7 +23,7 @@
         <a class="dropdown-toggle text-black waves-attach padding-left-no padding-right-no waves-effect btn btn-white"
            data-toggle="dropdown">
             <span><i class="icon icon-lg">arrow_drop_down</i></span>
-            <span>相關操作</span>
+            <span class="hidden-xs">相關操作</span>
         </a>
         <ul class="dropdown-menu folder-list ">
             {%- if route.action != 'add' -%}
