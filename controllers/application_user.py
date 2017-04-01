@@ -115,7 +115,9 @@ class ApplicationUser(Controller):
     def admin_delete(self, key):
         target = self.util.decode_key(key).get()
         self.application_user_level = self.application_user.get_role_level()
-        target_level = target.get_role_level
+        target_level = target.get_role_level()
+        self.logging.info('self.application_user_level = %s' % self.application_user_level)
+        self.logging.info('target_level = %s' % target_level)
         if self.application_user_level < target_level:
             return self.abort(403)
         return scaffold.delete(self, key)
@@ -190,3 +192,11 @@ class ApplicationUser(Controller):
     def logout(self):
         self.session['application_user_key'] = None
         return self.redirect('/')
+
+    @route_with('/logout.json')
+    def logout_json(self):
+        self.meta.change_view('json')
+        self.session['application_user_key'] = None
+        self.context['data'] = {
+            'is_login': 'false'
+        }
