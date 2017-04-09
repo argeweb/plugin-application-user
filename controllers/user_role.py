@@ -63,7 +63,7 @@ class UserRole(Controller):
                     act['enable'] = True
             return item
 
-        role = self.util.decode_key(key).get()
+        role = self.params.get_ndb_record(key)
         if self.application_user_level < role.level:
             return self.abort(403)
         action_list = []

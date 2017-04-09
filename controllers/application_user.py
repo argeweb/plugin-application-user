@@ -47,7 +47,7 @@ class ApplicationUser(Controller):
 
     @csrf_protect
     def admin_edit(self, key):
-        target = self.util.decode_key(key).get()
+        target = self.params.get_ndb_record(key)
         target_level = target.get_role_level()
         self.application_user_level = self.application_user.get_role_level()
         if self.application_user_level < target_level:
@@ -113,7 +113,7 @@ class ApplicationUser(Controller):
         return scaffold.edit(self, self.application_user.key)
 
     def admin_delete(self, key):
-        target = self.util.decode_key(key).get()
+        target = self.params.get_ndb_record(key)
         self.application_user_level = self.application_user.get_role_level()
         target_level = target.get_role_level()
         self.logging.info('self.application_user_level = %s' % self.application_user_level)
