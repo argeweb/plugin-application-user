@@ -90,8 +90,8 @@ class ApplicationUser(Controller):
         self.context['change_view_to_view_function'] = ''
         def scaffold_before_validate(**kwargs):
             parser = kwargs['parser']
-            change_level = parser.data['role'].get().level
             item = kwargs['item']
+            change_level = item.get_role_level()
             item.old_password = item.password
             item.new_password = parser.data['password']
 

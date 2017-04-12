@@ -9,8 +9,9 @@
 from argeweb import BasicModel
 from argeweb import Fields
 from role_model import RoleModel as RoleModel
-from argeweb.libs.bcrypt import bcrypt
 from argeweb.libs.wtforms.validators import InputRequired
+# bcrypt use argeweb.libs.bcrypt.zip
+from bcrypt import bcrypt
 
 
 class ApplicationUserModel(BasicModel):
