@@ -1,4 +1,5 @@
-{% extends "backend/config.html" %}
+{% extends "backend/form.html" %}
+{%- block layout_header -%}{% endblock %}
 {% block layout_before_content %}
 <div class="ibox-content m-b-sm border-bottom">
     <div class="p-xs">
@@ -12,4 +13,6 @@
 </div>
 {% endblock %}
 
-{% block submit_text_f %}儲存個人資料{% endblock %}
+{% block layout_buttons %}
+    <a class="fbtn fbtn-lg fbtn-brand-accent waves-attach waves-circle waves-light" href="javascript: saveForm();"><span class="fbtn-text fbtn-text-left">儲存個人資料</span><span class="icon icon-lg">save</span></a>
+{% endblock %}
