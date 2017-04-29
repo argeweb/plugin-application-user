@@ -62,37 +62,46 @@ class Role(Controller):
                     act['enable'] = False
                 else:
                     act['enable'] = True
+                item[act['action']] = act
             return item
 
         role = self.params.get_ndb_record(key)
         self.context['application_user_level'] = self.application_user.get_role_level()
         if self.context['application_user_level'] < role.level:
             return self.abort(403)
-        action_list = []
+        model_list = []
         role_prohibited_actions = role.prohibited_actions
         for item in self.plugins.get_enable_plugins_from_db(self.server_name, self.namespace):
+            action_list = []
             helper = self.plugins.get_helper(item)
             if helper is None:
                 continue
             if 'controllers' not in helper:
                 continue
+            item_plugins_check = None
             try:
                 for ra_item in helper['controllers']:
-                    action_list.append(process_item(item, ra_item, helper['controllers'][ra_item], role_prohibited_actions))
+                    item_n = process_item(item, ra_item, helper['controllers'][ra_item], role_prohibited_actions)
+                    if 'plugins_check' in item_n:
+                        item_plugins_check = item_n['plugins_check']
+                    action_list.append(item_n)
             except:
                 pass
+            model_list.append({'name':helper['title'], 'controllers': action_list, 'plugins_check': item_plugins_check, 'desc': helper['desc']})
         module_path = 'application'
         module = __import__('%s' % module_path, fromlist=['*'])
+        action_list = []
         for item in self.plugins.get_installed_list():
             try:
                 cls = getattr(module, '%s_action_helper' % item)
                 action_list.append(process_item('application', item, cls, role_prohibited_actions))
             except:
                 pass
+        model_list.append({'name': u'應用程式', 'controllers': action_list, 'plugins_check': None, 'desc': u''})
 
         self.context['item'] = role
         self.context['item_key'] = key
-        self.context['role'] = action_list
+        self.context['role'] = model_list
 
     @route_menu(list_name=u'backend', text=u'角色管理', sort=9802, icon='users', group=u'帳號管理')
     def admin_list(self):

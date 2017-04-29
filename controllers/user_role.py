@@ -50,48 +50,6 @@ class UserRole(Controller):
             'msg': msg
         }
 
-    @route_with('/admin/application_user_role/:<key>/permissions')
-    def admin_action_permissions(self, key):
-        def process_item(plugin, controller, item, action):
-            for act in item['actions']:
-                uri = 'admin:%s:%s' % (controller, act['action'])
-                act['uri'] = 'plugins.%s.controllers.%s.%s' % (plugin, controller, act['action'])
-                act['checkbox_id'] = 'plugins-%s-controllers-%s-%s' % (plugin, controller, act['action'])
-                if act['uri'] in action:
-                    act['enable'] = False
-                else:
-                    act['enable'] = True
-            return item
-
-        role = self.params.get_ndb_record(key)
-        if self.application_user_level < role.level:
-            return self.abort(403)
-        action_list = []
-        role_prohibited_actions = role.prohibited_actions
-        for item in self.plugins.get_enable_plugins_from_db(self.server_name, self.namespace):
-            helper = self.plugins.get_helper(item)
-            if helper is None:
-                continue
-            if 'controllers' not in helper:
-                continue
-            try:
-                for ra_item in helper['controllers']:
-                    action_list.append(process_item(item, ra_item, helper['controllers'][ra_item], role_prohibited_actions))
-            except:
-                pass
-        module_path = 'application'
-        module = __import__('%s' % module_path, fromlist=['*'])
-        for item in self.plugins.get_installed_list():
-            try:
-                cls = getattr(module, '%s_action_helper' % item)
-                action_list.append(process_item('application', item, cls, role_prohibited_actions))
-            except:
-                pass
-
-        self.context['item'] = role
-        self.context['item_key'] = key
-        self.context['role'] = action_list
-
     @route_menu(list_name=u'backend', text=u'帳號角色管理', sort=9803, icon='users', group=u'帳號管理')
     def admin_list(self):
         return scaffold.list(self)

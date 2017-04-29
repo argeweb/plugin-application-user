@@ -29,7 +29,7 @@ class ApplicationUser(Controller):
                              '/plugins/backend_ui_material/static/images/users/avatar-001.jpg')
         return self.redirect('/')
 
-    @route_menu(list_name=u'backend', text=u'帳號管理', sort=9801, icon='users', group=u'帳號管理', need_hr_parent=True)
+    @route_menu(list_name=u'backend', text=u'帳號管理', sort=9801, icon='users', group=u'帳號管理')
     def admin_list(self):
         self.context['application_user_key'] = self.application_user.key
         self.context['application_user_level'] = self.application_user.get_role_level()
@@ -83,6 +83,11 @@ class ApplicationUser(Controller):
             if not token or str(token) != str(controller.request.get('csrf_token')):
                 return False, 'Cross-site request forgery failure'
         return True
+
+    @route
+    def admin_login_for_test(self):
+        self.session['application_user_key'] = self.session['application_admin_user_key']
+        return self.session['application_admin_user_key']
 
     @csrf_protect
     @route
