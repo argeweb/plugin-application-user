@@ -72,6 +72,8 @@ class ApplicationUser(Controller):
 
         self.events.scaffold_before_validate += scaffold_before_validate
         self.events.scaffold_after_save += bycrypt_password
+        if target.key == self.application_user.key:
+            self.Scaffold.hidden_in_form.append('is_enable')
         return scaffold.edit(self, key)
 
     def require_high_level_role(controller):
@@ -115,6 +117,7 @@ class ApplicationUser(Controller):
 
         self.events.scaffold_before_validate += scaffold_before_validate
         self.events.scaffold_after_save += bycrypt_password
+        self.Scaffold.hidden_in_form.append('is_enable')
         return scaffold.edit(self, self.application_user.key)
 
     def admin_delete(self, key):

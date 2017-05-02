@@ -45,3 +45,11 @@
     {%- endif %}
 {% endfor -%}
 {% endblock %}
+
+{% block layout_buttons %}
+    {%- if scaffolding %}
+        {% if uri_exists_with_permission(action="add") -%}
+            <a href="{{ uri_action_link('add') }}" class="fbtn fbtn-lg fbtn-brand-accent waves-attach waves-circle waves-light"><span class="fbtn-text fbtn-text-left">{{ s.scaffold_title("add") }}</span><span class="icon icon-lg">edit</span></a>
+        {%- endif -%}
+    {%- endif %}
+{% endblock %}

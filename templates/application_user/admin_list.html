@@ -16,15 +16,27 @@
         </td>
         {% for property in scaffolding.display_in_list -%}
         <td>{%- if property.find("is_") >= 0 %}
+            {%- if property.find("is_enable") >= 0 and application_user_key != item.key %}
             <div class="checkbox checkbox-success">
                 <input type="checkbox" {% if item[property] %}checked{% endif %} id="{{ print_key(item) }}"
-                       class="btn-checkbox-json">
+                       class="btn-checkbox-json"
+                       data-enable-url="{{ uri_action_link('set_boolean_field', item) }}?field={{ field_name }}&value=true"
+                       data-disable-url="{{ uri_action_link('set_boolean_field', item) }}?field={{ field_name }}&value=false"
+                >
                 <label for="{{ print_key(item) }}">{{ s.scaffold_field_name("short_" + property) }}</label>
-            </div>
+            </div>{% else %}{% endif %}
             {% else -%}{{ print_value(item[property]) }}{%- endif -%}
         </td>
         {% endfor -%}
     </tr>
     {%- endif %}
 {% endfor -%}
+{% endblock %}
+
+{% block layout_buttons %}
+    {%- if scaffolding %}
+        {% if uri_exists_with_permission(action="add") -%}
+            <a href="{{ uri_action_link('add') }}" class="fbtn fbtn-lg fbtn-brand-accent waves-attach waves-circle waves-light"><span class="fbtn-text fbtn-text-left">{{ s.scaffold_title("add") }}</span><span class="icon icon-lg">edit</span></a>
+        {%- endif -%}
+    {%- endif %}
 {% endblock %}

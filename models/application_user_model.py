@@ -23,6 +23,10 @@ class ApplicationUserModel(BasicModel):
     is_enable = Fields.BooleanProperty(default=True, verbose_name=u'啟用')
     rest_password_token = Fields.StringProperty(verbose_name=u'重設密碼令牌', default=u'')
 
+    @property
+    def title(self):
+        return self.account
+
     @classmethod
     def get_user(cls, account, password, is_enable=True):
         a = cls.query(

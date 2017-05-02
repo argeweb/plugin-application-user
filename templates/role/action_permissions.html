@@ -8,7 +8,7 @@
             <i class="material-icons mid-icon brand-text-color">lock</i>
         </div>
         <h2>角色權限管理 - {{ item.title }}</h2>
-        <span>針對特定角色給與操作的權限，組件名稱名稱後面之核選方塊為 (啟用/停用) 該組件的權限。 </span><br />
+        <span>針對特定角色給與操作的權限，組件名稱名稱前面之核選方塊為 (啟用/停用) 該組件的權限。 </span><br />
     </div>
 </div>
 {% endblock %}
@@ -34,21 +34,21 @@
             <tbody>
             {% for item_model in list %}
                 <tr>
-                    <td class="text-left"><strong>{{ item_model.name }}</strong>{% if item_model.plugins_check %}
+                    <td class="text-left brand-text-color">{% if item_model.plugins_check %}
                         <input type="checkbox" {% if item_model.plugins_check.enable %}checked{% endif %} id="ro-field-{{ item_model.plugins_check.checkbox_id }}" data-uri="{{ item_model.plugins_check.uri }}">
-                        <label for="ro-field-{{ item_model.plugins_check.checkbox_id }}"><b class="text-success"></b></label>{% endif %}</td>
-                    <td colspan="7" class="text-left">{{ item_model.desc }}</td>
+                        <label for="ro-field-{{ item_model.plugins_check.checkbox_id }}"><b class="text-success"></b></label>{% endif %}<strong>{{ item_model.name }}</strong></td>
+                    <td colspan="7" class="text-left brand-text-color">說明：{{ item_model.desc }}</td>
                 </tr>
                 {% for item in item_model.controllers %}
                 <tr>
                     <td class="text-left"></td>
-                    <td class="text-left"><b class="text-success">{{ item.group }}</b></td>
-                    <td class="text-left">{% if item.add %}
-                        <input type="checkbox" {% if item.add.enable %}checked{% endif %} id="ro-field-{{ item.add.checkbox_id }}" data-uri="{{ item.add.uri }}">
-                        <label for="ro-field-{{ item.add.checkbox_id }}">{{ item.add.name }}</label>{% endif %}</td>
+                    <td class="text-left"><b class="brand-text-color">{{ item.group }}</b></td>
                     <td class="text-left">{% if item.list %}
                         <input type="checkbox" {% if item.list.enable %}checked{% endif %} id="ro-field-{{ item.list.checkbox_id }}" data-uri="{{ item.list.uri }}">
                         <label for="ro-field-{{ item.list.checkbox_id }}">{{ item.list.name }}</label>{% endif %}</td>
+                    <td class="text-left">{% if item.add %}
+                        <input type="checkbox" {% if item.add.enable %}checked{% endif %} id="ro-field-{{ item.add.checkbox_id }}" data-uri="{{ item.add.uri }}">
+                        <label for="ro-field-{{ item.add.checkbox_id }}">{{ item.add.name }}</label>{% endif %}</td>
                     <td class="text-left">{% if item.edit %}
                         <input type="checkbox" {% if item.edit.enable %}checked{% endif %} id="ro-field-{{ item.edit.checkbox_id }}" data-uri="{{ item.edit.uri }}">
                         <label for="ro-field-{{ item.edit.checkbox_id }}">{{ item.edit.name }}</label>{% endif %}</td>
