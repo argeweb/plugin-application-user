@@ -89,7 +89,7 @@ class ApplicationUser(Controller):
     @route
     def admin_login_for_test(self):
         self.session['application_user_key'] = self.session['application_admin_user_key']
-        return self.session['application_admin_user_key']
+        return str(self.session['application_admin_user_key'])
 
     @csrf_protect
     @route
