@@ -42,6 +42,7 @@ class ApplicationUser(Controller):
         def bycrypt_password(**kwargs):
             item = kwargs['item']
             item.bycrypt_password()
+            item.try_to_create_user_role()
         self.events.scaffold_after_save += bycrypt_password
         return scaffold.add(self)
 
@@ -69,22 +70,13 @@ class ApplicationUser(Controller):
         def bycrypt_password(**kwargs):
             item = kwargs['item']
             item.bycrypt_password_with_old_password()
+            item.try_to_create_user_role()
 
         self.events.scaffold_before_validate += scaffold_before_validate
         self.events.scaffold_after_save += bycrypt_password
         if target.key == self.application_user.key:
             self.Scaffold.hidden_in_form.append('is_enable')
         return scaffold.edit(self, key)
-
-    def require_high_level_role(controller):
-        """
-        Authorization chain that validates the CSRF token.
-        """
-        if controller.request.method in ('POST', 'PUT') and not controller.request.path.startswith('/taskqueue'):
-            token = controller.session.get('_csrf_token')
-            if not token or str(token) != str(controller.request.get('csrf_token')):
-                return False, 'Cross-site request forgery failure'
-        return True
 
     @route
     def admin_login_for_test(self):

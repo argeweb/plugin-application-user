@@ -22,6 +22,7 @@ class ApplicationUserModel(BasicModel):
     avatar = Fields.ImageProperty(verbose_name=u'頭像')
     is_enable = Fields.BooleanProperty(default=True, verbose_name=u'啟用')
     rest_password_token = Fields.StringProperty(verbose_name=u'重設密碼令牌', default=u'')
+    roles_helper = Fields.StringProperty(verbose_name=u'角色', default=u'user')
 
     @property
     def title(self):
@@ -80,6 +81,13 @@ class ApplicationUserModel(BasicModel):
         from ..models.user_role_model import UserRoleModel
         UserRoleModel.set_role(user, role)
         return user
+
+    def try_to_create_user_role(self):
+        roles = (u'%s' % self.roles_helper).split(u',')
+        from ..models.user_role_model import UserRoleModel
+        for role in roles:
+            UserRoleModel.set_role(self, role.strip())
+        return self
 
     @classmethod
     def get_list(cls):
