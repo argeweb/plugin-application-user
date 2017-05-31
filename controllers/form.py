@@ -44,7 +44,6 @@ class Form(Controller):
         self.session['application_user_key'] = application_user.key
         self.context['data'] = {'result': 'success'}
 
-
     @route
     @route_with(name='form:user:login_by_email')
     def login_by_email(self):

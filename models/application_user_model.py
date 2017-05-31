@@ -117,6 +117,10 @@ class ApplicationUserModel(BasicModel):
                 level = r_level
         return level
 
+    def has_role(self, role):
+        from user_role_model import UserRoleModel
+        return UserRoleModel.is_in_role(self, role)
+
     def check_and_get_role(self, role):
         from user_role_model import UserRoleModel
         role = UserRoleModel.get_role(role)
