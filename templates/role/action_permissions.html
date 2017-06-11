@@ -40,9 +40,10 @@
                     <td colspan="7" class="text-left brand-text-color">說明：{{ item_model.desc }}</td>
                 </tr>
                 {% for item in item_model.controllers %}
+                {% if len(item.actions) > 1 or item.actions[0].action != "plugins_check" %}
                 <tr>
                     <td class="text-left"></td>
-                    <td class="text-left"><b class="brand-text-color">{{ item.group }}</b></td>
+                    <td class="text-left"><b>{{ item.group }}</b></td>
                     <td class="text-left">{% if item.list %}
                         <input type="checkbox" {% if item.list.enable %}checked{% endif %} id="ro-field-{{ item.list.checkbox_id }}" data-uri="{{ item.list.uri }}">
                         <label for="ro-field-{{ item.list.checkbox_id }}">{{ item.list.name }}</label>{% endif %}</td>
@@ -62,6 +63,7 @@
                         <input type="checkbox" {% if act.enable %}checked{% endif %} id="ro-field-{{ act.checkbox_id }}" data-uri="{{ act.uri }}">
                         <label for="ro-field-{{ act.checkbox_id }}">{{ act.name }}</label>{% endif %}{% endfor %}</td>
                 </tr>
+                {% endif %}
             {% endfor %}
             {% endfor %}
             </tbody>
