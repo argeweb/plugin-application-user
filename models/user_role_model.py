@@ -5,6 +5,7 @@
 # Author: Qi-Liang Wen (温啓良）
 # Web: http://www.yooliang.com/
 # Date: 2015/7/12.
+from google.appengine.ext import ndb
 
 from argeweb import BasicModel
 from argeweb import Fields
@@ -61,7 +62,17 @@ class UserRoleModel(BasicModel):
         return n
 
     @classmethod
-    def is_in_role(cls, user, role):
+    def remove_role(cls, user, role):
+        role = cls.get_role(role)
+        if role is None:
+            return None
+        n = cls.query(cls.user == user.key, cls.role == role.key).get()
+        if n is None:
+            ndb.delete_multi(n.key)
+        return n
+
+    @classmethod
+    def has_role(cls, user, role):
         role = cls.get_role(role)
         if role is None:
             return False

@@ -119,7 +119,15 @@ class ApplicationUserModel(BasicModel):
 
     def has_role(self, role):
         from user_role_model import UserRoleModel
-        return UserRoleModel.is_in_role(self, role)
+        return UserRoleModel.has_role(self, role)
+
+    def set_role(self, role):
+        from user_role_model import UserRoleModel
+        return UserRoleModel.set_role(self, role)
+
+    def remove_role(self, role):
+        from user_role_model import UserRoleModel
+        return UserRoleModel.remove_role(self, role)
 
     def check_and_get_role(self, role):
         from user_role_model import UserRoleModel
@@ -130,13 +138,9 @@ class ApplicationUserModel(BasicModel):
                     return role
             return None
         else:
-            if UserRoleModel.is_in_role(self, role):
+            if UserRoleModel.has_role(self, role):
                 return role
             return None
-
-    def is_in_role(self, role):
-        from user_role_model import UserRoleModel
-        return UserRoleModel.is_in_role(self, role)
 
     def has_permission(self, action_full_name, strict=False):
         if len(self.roles) == 0:
