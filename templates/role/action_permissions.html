@@ -33,11 +33,11 @@
             </thead>
             <tbody>
             {% for item_model in list %}
-                <tr>
-                    <td class="text-left brand-text-color">{% if item_model.plugins_check %}
+                <tr class="bg-color-222">
+                    <td class="text-left brand-text-color bg-color-222">{% if item_model.plugins_check %}
                         <input type="checkbox" {% if item_model.plugins_check.enable %}checked{% endif %} id="ro-field-{{ item_model.plugins_check.checkbox_id }}" data-uri="{{ item_model.plugins_check.uri }}">
                         <label for="ro-field-{{ item_model.plugins_check.checkbox_id }}"><b class="text-success"></b></label>{% endif %}<strong>{{ item_model.name }}</strong></td>
-                    <td colspan="7" class="text-left brand-text-color">說明：{{ item_model.desc }}</td>
+                    <td colspan="7" class="text-left brand-text-color bg-color-222">說明：{{ item_model.desc }}</td>
                 </tr>
                 {% for item in item_model.controllers %}
                 {% if len(item.actions) > 1 or item.actions[0].action != "plugins_check" %}

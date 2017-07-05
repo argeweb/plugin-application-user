@@ -53,7 +53,37 @@ class Role(Controller):
 
     @route_with('/admin/application_user_role/:<key>/permissions')
     def admin_action_permissions(self, key):
-        def process_item(plugin, controller, item, action):
+        def process_application_or_plugin(application_or_plugin_name):
+            if application_or_plugin_name.startswith('application/'):
+                helper = self.plugins.get_helper(application_or_plugin_name.split('/')[1], 'application')
+            else:
+                helper = self.plugins.get_helper(application_or_plugin_name, 'plugins')
+            if helper is None:
+                return None
+            if 'controllers' not in helper:
+                return None
+            controllers, item_plugins_check = process_controller(helper)
+            return {
+                'name': helper['title'],
+                'controllers': controllers,
+                'plugins_check': item_plugins_check,
+                'desc': helper['desc']
+            }
+
+        def process_controller(helper):
+            action_list_in_controller = []
+            enable_or_disable_plugin_check = None
+            try:
+                for ra_item in helper['controllers']:
+                    item_n = process_actions(item, ra_item, helper['controllers'][ra_item], role_prohibited_actions)
+                    if 'plugins_check' in item_n:
+                        enable_or_disable_plugin_check = item_n['plugins_check']
+                    action_list_in_controller.append(item_n)
+            except:
+                pass
+            return action_list_in_controller, enable_or_disable_plugin_check
+
+        def process_actions(plugin, controller, item, action):
             for act in item['actions']:
                 uri = 'admin:%s:%s' % (controller, act['action'])
                 act['uri'] = 'plugins.%s.controllers.%s.%s' % (plugin, controller, act['action'])
@@ -71,33 +101,10 @@ class Role(Controller):
             return self.abort(403)
         model_list = []
         role_prohibited_actions = role.prohibited_actions
-        for item in self.plugins.get_enable_plugins_from_db(self.server_name, self.namespace):
-            action_list = []
-            helper = self.plugins.get_helper(item)
-            if helper is None:
-                continue
-            if 'controllers' not in helper:
-                continue
-            item_plugins_check = None
-            try:
-                for ra_item in helper['controllers']:
-                    item_n = process_item(item, ra_item, helper['controllers'][ra_item], role_prohibited_actions)
-                    if 'plugins_check' in item_n:
-                        item_plugins_check = item_n['plugins_check']
-                    action_list.append(item_n)
-            except:
-                pass
-            model_list.append({'name':helper['title'], 'controllers': action_list, 'plugins_check': item_plugins_check, 'desc': helper['desc']})
-        module_path = 'application'
-        module = __import__('%s' % module_path, fromlist=['*'])
-        action_list = []
-        for item in self.plugins.get_installed_list():
-            try:
-                cls = getattr(module, '%s_action_helper' % item)
-                action_list.append(process_item('application', item, cls, role_prohibited_actions))
-            except:
-                pass
-        model_list.append({'name': u'應用程式', 'controllers': action_list, 'plugins_check': None, 'desc': u''})
+        for item in self.plugins.get_enable_plugins_from_db(self.server_name, self.namespace)+ self.plugins.get_installed_list():
+            app_information = process_application_or_plugin(item)
+            if app_information is not None:
+                model_list.append(app_information)
 
         self.context['item'] = role
         self.context['item_key'] = key
