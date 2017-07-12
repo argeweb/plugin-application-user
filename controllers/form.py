@@ -89,15 +89,19 @@ class Form(Controller):
 
         application_user = self.meta.Model.create_account_by_email(input_email, input_password)
 
-        mail = Mail(self)
-        r = mail.send_width_template('notice_create_user_by_email', application_user.email, {
-            'site_name': self.host_information.site_name,
-            'name': application_user.name,
-            'email': application_user.email,
-            'created_date': self.util.localize_time(datetime.now()),
-            'domain': self.host_information.host,
-            'token': application_user.rest_password_token
-        })
+        try:
+            mail = Mail(self)
+            r = mail.send_width_template('notice_create_user_by_email', application_user.email, {
+                'site_name': self.host_information.site_name,
+                'name': application_user.name,
+                'email': application_user.email,
+                'created_date': self.util.localize_time(datetime.now()),
+                'domain': self.host_information.host,
+                'token': application_user.rest_password_token
+            })
+        except:
+            self.logging.error(u'無法寄送郵件')
+
         self.session['application_user_key'] = application_user.key
         self.context['message'] = u'註冊完成'
         self.context['data'] = {'result': 'success'}
