@@ -1,0 +1,37 @@
+{% extends "backend/list.html" %}
+
+{# 權限 #}
+{% macro check_permission_url(action, item) -%}
+    {% if action == "view" %}{% if uri_permission(action="view", item=item) %}data-view-url="{{ uri_action_link('view', item) }}"{% endif %}{% endif %}
+    {% if action == "edit" %}{% if uri_permission(action='edit', item=item) %}data-edit-url="{{ uri_action_link('edit', item) }}"{% endif %}{% endif %}
+    {% if action == "delete" %}{% if uri_permission(action='delete', item=item) %}data-delete-url="{{ uri_action_link('delete', item) }}"{% endif %}{% endif %}
+{%- endmacro %}
+
+{% block partial_tr_item %}
+{%- set list = context[scaffolding.plural] -%}
+{% for item in list %}
+    {% if (item.role == su_key and has_role) or item.role != su_key -%}
+    <tr id="node_{{ item.sort }}" class="record_item"
+        {{ check_permission_url("view", item) }}
+        {{ check_permission_url("edit", item) }}
+        {{ check_permission_url("delete", item) }}
+        data-id="{{ print_key(item) }}">
+        <td class="text-center sorting-mode move-headline">
+            {% if uri_permission(action="sort_up", item=item) %}<a href="{{ uri_action_link('sort_up', item) }}" class="btn-json"><i class="icon icon-2x">keyboard_arrow_up</i></a>{% endif %}
+            <i class="icon icon-2x">view_headline</i>
+            {% if uri_permission(action="sort_down", item=item) %}<a href="{{ uri_action_link('sort_down', item) }}" class="btn-json"><i class="icon icon-2x">keyboard_arrow_down</i></a>{% endif %}
+        </td>
+        {% for property in scaffolding.display_in_list -%}
+        <td>{%- if property.find("is_") >= 0 %}
+            <div class="checkbox checkbox-success">
+                <input type="checkbox" {% if item[property] %}checked{% endif %} id="{{ print_key(item) }}"
+                       class="btn-checkbox-json">
+                <label for="{{ print_key(item) }}">{{ s.get_scaffold_field_title("short_" + property) }}</label>
+            </div>
+            {% else -%}{{ print_value(item[property]) }}{%- endif -%}
+        </td>
+        {% endfor -%}
+    </tr>
+    {%- endif %}
+{% endfor -%}
+{% endblock %}

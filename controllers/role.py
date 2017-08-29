@@ -19,8 +19,14 @@ class Role(Controller):
 
     class Scaffold:
         display_in_form = ('title', 'name', 'level')
-        display_in_list = ('title', 'name', 'level')
+        display_in_list = ['title', 'name', 'level']
         hidden_in_form = ['prohibited_actions']
+        actions_in_list = [{
+            'name': 'permissions',
+            'title': u'權限',
+            'uri': 'admin:application_user:role:action_permissions',
+            'button': u'權限'
+        }]
 
     @route
     def admin_permissions_set_json(self):
@@ -38,26 +44,25 @@ class Role(Controller):
         if enable == u'true':
             if uri in role_prohibited_actions_list:
                 role_prohibited_actions_list.remove(uri)
-            msg = u'已啟用'
+            msg = u'權限已啟用'
         else:
             if uri not in role_prohibited_actions_list:
                 role_prohibited_actions_list.append(uri)
-            msg = u'已停用'
-        s = ','.join(role_prohibited_actions_list)
-        role.prohibited_actions = s
+            msg = u'權限已停用'
+        role.prohibited_actions = ','.join(role_prohibited_actions_list)
         role.put()
         self.context['data'] = {
             'result': 'success',
             'message': msg
         }
 
-    @route_with('/admin/application_user_role/:<key>/permissions')
-    def admin_action_permissions(self, key):
-        def process_application_or_plugin(application_or_plugin_name):
-            if application_or_plugin_name.startswith('application/'):
-                helper = self.plugins.get_helper(application_or_plugin_name.split('/')[1], 'application')
-            else:
-                helper = self.plugins.get_helper(application_or_plugin_name, 'plugins')
+    @route
+    def admin_action_permissions(self, source):
+        def get_plugin_helper(application_or_plugin_name):
+            sp_name = application_or_plugin_name.split('.')
+            type_name = sp_name[0]
+            application_or_plugin_name = '.'.join(sp_name)
+            helper = self.plugins.get_helper(application_or_plugin_name, type_name)
             if helper is None:
                 return None
             if 'controllers' not in helper:
@@ -86,7 +91,7 @@ class Role(Controller):
         def process_actions(plugin, controller, item, action):
             for act in item['actions']:
                 uri = 'admin:%s:%s' % (controller, act['action'])
-                act['uri'] = 'plugins.%s.controllers.%s.%s' % (plugin, controller, act['action'])
+                act['uri'] = '%s.controllers.%s.%s' % (plugin, controller, act['action'])
                 act['checkbox_id'] = 'plugins-%s-controllers-%s-%s' % (plugin, controller, act['action'])
                 if act['uri'] in action:
                     act['enable'] = False
@@ -95,29 +100,30 @@ class Role(Controller):
                 item[act['action']] = act
             return item
 
-        role = self.params.get_ndb_record(key)
+        role = self.params.get_ndb_record(source)
         self.context['application_user_level'] = self.application_user.get_role_level()
         if self.context['application_user_level'] < role.level:
             return self.abort(403)
         model_list = []
         role_prohibited_actions = role.prohibited_actions
-        for item in self.plugins.get_enable_plugins_from_db(self.server_name, self.namespace)+ self.plugins.get_installed_list():
-            app_information = process_application_or_plugin(item)
-            if app_information is not None:
-                model_list.append(app_information)
+        plugins_list = self.host_information.plugins_list
+        for item in plugins_list:
+            if item != 'plugins.plugin_manager':
+                app_information = get_plugin_helper(item)
+                if app_information is not None:
+                    model_list.append(app_information)
 
         self.context['item'] = role
-        self.context['item_key'] = key
+        self.context['item_key'] = source
         self.context['role'] = model_list
 
-    @route_menu(list_name=u'backend', text=u'角色管理', sort=9802, icon='users', group=u'帳號管理')
+    @route_menu(list_name=u'backend', group=u'帳號管理', text=u'角色管理', sort=9802, icon='users')
     def admin_list(self):
         self.context['application_user_level'] = self.application_user.get_role_level()
         return scaffold.list(self)
 
     @csrf_protect
     def admin_add(self):
-        self.application_user_level = self.application_user.get_role_level()
         def scaffold_before_validate(**kwargs):
             parser = kwargs['parser']
             change_level = self.params.get_integer('level')
@@ -128,17 +134,12 @@ class Role(Controller):
                 return parser.container.validate() if parser.container else False
             parser.validate = validate
 
+        self.application_user_level = self.application_user.get_role_level()
         self.events.scaffold_before_validate += scaffold_before_validate
         return scaffold.add(self)
 
     @csrf_protect
     def admin_edit(self, key, *args):
-        target = self.params.get_ndb_record(key)
-        target_level = target.level
-        self.application_user_level = self.application_user.get_role_level()
-        if self.application_user_level < target_level:
-            return self.abort(403)
-
         def scaffold_before_validate(**kwargs):
             parser = kwargs['parser']
             change_level = self.params.get_integer('level')
@@ -158,6 +159,11 @@ class Role(Controller):
                 return parser.container.validate() if parser.container else False
             parser.validate = validate
 
+        target = self.params.get_ndb_record(key)
+        target_level = target.level
+        self.application_user_level = self.application_user.get_role_level()
+        if self.application_user_level < target_level:
+            return self.abort(403)
         self.events.scaffold_before_validate += scaffold_before_validate
         self.context['application_user_level'] = self.application_user_level
         return scaffold.edit(self, key)

@@ -1,0 +1,31 @@
+{% extends "backend/list_layout.html" %}
+
+{% block page_content %}
+    <div class="row">
+        <div class="mail-box sortable-list">
+            <table class="table table-hover margin-0" data-cookie-id-table="{{ scaffolding.plural }}_{{ route.action }}" data-show-columns="true" data-toggle="table" data-cookie="true" id="list-table">
+                <thead>
+                <tr>
+                    <th data-field="role_name" class="text-center">角色名稱</th>
+                    <th data-field="has_role" class="text-center">設置</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {% for role in roles %}
+                    <tr class="record_item">
+                        <td>{{ role.title }}</td>
+                        <td>
+                            <input type="checkbox" name="role" {% if role.has_role %}checked{% endif %}
+                               class="btn-checkbox-json"
+                               data-enable-url="{{ uri_action_link('set_user_role', application_user) }}?role={{ print_key(role) }}&value=true"
+                               data-disable-url="{{ uri_action_link('set_user_role', application_user) }}?role={{ print_key(role) }}&value=false"
+
+                            />
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

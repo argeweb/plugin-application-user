@@ -18,9 +18,9 @@ class ApplicationUserModel(BasicModel):
     name = Fields.StringProperty(required=True, verbose_name=u'名稱')
     account = Fields.StringProperty(required=True, verbose_name=u'帳號')
     password = Fields.StringProperty(required=True, verbose_name=u'密碼')
-    email = Fields.StringProperty(default=u'', verbose_name=u'E-Mail')
+    email = Fields.StringProperty(verbose_name=u'E-Mail', default=u'')
     avatar = Fields.ImageProperty(verbose_name=u'頭像')
-    is_enable = Fields.BooleanProperty(default=True, verbose_name=u'啟用')
+    is_enable = Fields.BooleanProperty(verbose_name=u'啟用', default=True)
     rest_password_token = Fields.StringProperty(verbose_name=u'重設密碼令牌', default=u'')
     roles_helper = Fields.StringProperty(verbose_name=u'角色', default=u'user')
 
@@ -110,11 +110,15 @@ class ApplicationUserModel(BasicModel):
         return self._roles
 
     def get_role_level(self, highest=True):
-        level = 0
-        for r in self.roles:
-            r_level = r.role.get().level
-            if r_level > level:
-                level = r_level
+        if not hasattr(self, '_level'):
+            level = 0
+            for r in self.roles:
+                r_level = r.role.get().level
+                if r_level > level:
+                    level = r_level
+            setattr(self, '_level', level)
+        else:
+            level = getattr(self, '_level')
         return level
 
     def has_role(self, role):

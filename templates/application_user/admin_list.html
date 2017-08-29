@@ -23,7 +23,7 @@
                        data-enable-url="{{ uri_action_link('set_boolean_field', item) }}?field={{ field_name }}&value=true"
                        data-disable-url="{{ uri_action_link('set_boolean_field', item) }}?field={{ field_name }}&value=false"
                 >
-                <label for="{{ print_key(item) }}">{{ s.scaffold_field_name("short_" + property) }}</label>
+                <label for="{{ print_key(item) }}">{{ s.get_scaffold_field_title("short_" + property) }}</label>
             </div>{% else %}{% endif %}
             {% else -%}{{ print_value(item[property]) }}{%- endif -%}
         </td>
@@ -33,7 +33,7 @@
 {% endfor -%}
 {% endblock %}
 
-{% block layout_buttons %}
+{% block page_fly_button %}
     {%- if scaffolding %}
         {% if uri_exists_with_permission(action="add") -%}
             <a href="{{ uri_action_link('add') }}" class="fbtn fbtn-lg fbtn-brand-accent waves-attach waves-circle waves-light"><span class="fbtn-text fbtn-text-left">{{ s.scaffold_title("add") }}</span><span class="icon icon-lg">edit</span></a>

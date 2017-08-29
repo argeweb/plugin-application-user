@@ -6,7 +6,7 @@
 # Web: http://www.yooliang.com/
 # Date: 2015/7/12.
 
-from argeweb import Controller, scaffold, route_menu, route_with, route, settings
+from argeweb import Controller, scaffold, route_menu, route_with, route
 from argeweb.components.pagination import Pagination
 from argeweb.components.csrf import CSRF, csrf_protect
 from argeweb.components.search import Search
@@ -17,19 +17,69 @@ class ApplicationUser(Controller):
         components = (scaffold.Scaffolding, Pagination, Search, CSRF)
 
     class Scaffold:
-        display_in_form = ('name', 'account', 'is_enable', 'sort', 'created', 'modified')
+        display_in_form = ['name', 'account', 'is_enable', 'sort', 'created', 'modified']
         hidden_in_form = ['rest_password_token']
-        display_in_list = ('name', 'account', 'email', 'is_enable', 'created')
+        display_in_list = ['name', 'account', 'email', 'is_enable', 'created']
+        actions_in_list = [{
+            'name': 'role_list',
+            'title': u'角色',
+            'uri': 'admin:application_user:application_user:set_role',
+            'button': u'角色'
+        }]
+
+    def __init__(self, *args, **kwargs):
+        super(ApplicationUser, self).__init__(*args, **kwargs)
+        self.target = None
+        self.target_level = 0
+        self.application_user_level = 0
 
     @route_with('/application_user_init')
     def application_user_init(self):
-        prohibited_actions = settings.get('application_user_prohibited_actions', u'')
-        from ...application_user import application_user_init
-        application_user_init(u'管理員', 'admin', "qwER12#$", prohibited_actions,
-                             '/plugins/backend_ui_material/static/images/users/avatar-001.jpg')
+        self.fire('application_user_init')
         return self.redirect('/')
 
-    @route_menu(list_name=u'backend', text=u'帳號管理', sort=9801, icon='users', group=u'帳號管理')
+    def check_level(self, target):
+        self.target = target
+        self.application_user_level = self.application_user.get_role_level()
+        if self.application_user_level < self.target_level:
+            return False
+        return True
+
+    @route
+    def admin_set_role(self, source):
+        if self.check_level(self.params.get_ndb_record(source)) is False:
+            return self.abort(403)
+        from ..models.role_model import RoleModel
+        from ..models.user_role_model import UserRoleModel
+        roles = RoleModel.get_list()
+        user_roles = UserRoleModel.get_user_roles(self.application_user)
+        for role in roles:
+            has_role = False
+            for user_role in user_roles:
+                if role.name == user_role.role_name:
+                    has_role = True
+            setattr(role, 'has_role', has_role)
+        self.context['application_user'] = self.application_user
+        self.context['roles'] = roles
+
+    @route
+    def admin_set_user_role(self, key):
+        self.meta.change_view('json')
+        self.scaffold.scaffold_type = 'set_boolean_field'
+        user = self.params.get_ndb_record(key)
+        role = self.params.get_ndb_record('role')
+        role_value = self.params.get_boolean('value')
+        from ..models.user_role_model import UserRoleModel
+        if role_value:
+            UserRoleModel.set_role(user, role)
+            val_word = u'啟用'
+        else:
+            UserRoleModel.remove_role(user, role)
+            val_word = u'停用'
+        self.context['data'] = {'info': 'success'}
+        self.context['message'] = u'%s 已 %s' % (role.title, val_word)
+
+    @route_menu(list_name=u'backend', group=u'帳號管理', text=u'帳號管理', sort=9801, icon='users')
     def admin_list(self):
         self.context['application_user_key'] = self.application_user.key
         self.context['application_user_level'] = self.application_user.get_role_level()
@@ -48,12 +98,6 @@ class ApplicationUser(Controller):
 
     @csrf_protect
     def admin_edit(self, key):
-        target = self.params.get_ndb_record(key)
-        target_level = target.get_role_level()
-        self.application_user_level = self.application_user.get_role_level()
-        if self.application_user_level < target_level:
-            return self.abort(403)
-
         def scaffold_before_validate(**kwargs):
             parser = kwargs['parser']
             item = kwargs['item']
@@ -61,7 +105,7 @@ class ApplicationUser(Controller):
             item.new_password = parser.data['password']
 
             def validate():
-                if self.application_user_level < target_level:
+                if self.application_user_level < self.target_level:
                     parser.errors['role'] = u'您的權限等級低於此角色'
                     return False
                 return parser.container.validate() if parser.container else False
@@ -72,9 +116,11 @@ class ApplicationUser(Controller):
             item.bycrypt_password_with_old_password()
             item.try_to_create_user_role()
 
+        if self.check_level(self.params.get_ndb_record(key)) is False:
+            return self.abort(403)
         self.events.scaffold_before_validate += scaffold_before_validate
         self.events.scaffold_after_save += bycrypt_password
-        if target.key == self.application_user.key:
+        if self.target.key == self.application_user.key:
             self.Scaffold.hidden_in_form.append('is_enable')
         return scaffold.edit(self, key)
 
@@ -85,8 +131,8 @@ class ApplicationUser(Controller):
 
     @csrf_protect
     @route
+    @route_menu(list_name=u'system', group=u'帳號管理', text=u'資料變更', sort=9998, icon=u'account_box')
     def admin_profile(self):
-        self.context['change_view_to_view_function'] = ''
         def scaffold_before_validate(**kwargs):
             parser = kwargs['parser']
             item = kwargs['item']
@@ -107,18 +153,14 @@ class ApplicationUser(Controller):
             item = kwargs['item']
             item.bycrypt_password_with_old_password()
 
+        self.context['change_view_to_view_function'] = ''
         self.events.scaffold_before_validate += scaffold_before_validate
         self.events.scaffold_after_save += bycrypt_password
         self.Scaffold.hidden_in_form.append('is_enable')
         return scaffold.edit(self, self.application_user.key)
 
     def admin_delete(self, key):
-        target = self.params.get_ndb_record(key)
-        self.application_user_level = self.application_user.get_role_level()
-        target_level = target.get_role_level()
-        self.logging.info('self.application_user_level = %s' % self.application_user_level)
-        self.logging.info('target_level = %s' % target_level)
-        if self.application_user_level < target_level:
+        if self.check_level(self.params.get_ndb_record(key)) is False:
             return self.abort(403)
         return scaffold.delete(self, key)
 

@@ -1,8 +1,8 @@
 {% extends "backend/form.html" %}
 
-{% block layout_header -%}{% endblock %}
-{% block layout_before_header -%}
-<div class="ibox-content m-b-sm border-bottom page-header-big">
+{% block page_header -%}{% endblock %}
+{% block page_big_header %}
+<div class="ibox-content m-b-sm border-bottom page-big-header">
     <div class="p-xs">
         <div class="pull-left m-r-md">
             <i class="material-icons mid-icon brand-text-color">lock</i>
@@ -13,37 +13,40 @@
 </div>
 {% endblock %}
 
-{% block layout_content %}
+{% block page_content %}
 {% set list = context[scaffolding.plural] %}
 <div class="wrapper wrapper-content">
     <div class="row action-permissions-operations">
-        <div class="mail-box sortable-list margin-0">
+        <div class="mail-box sortable-list">
             <table class="table table-hover margin-0">
             <thead>
             <tr>
                 <th data-field="plugin" class="text-center">組件名稱</th>
-                <th data-field="group" class="text-center">子功能</th>
-                <th data-field="list" class="text-center">列表</th>
-                <th data-field="add" class="text-center">新增</th>
-                <th data-field="view" class="text-center">檢視</th>
-                <th data-field="edit" class="text-center">編輯</th>
-                <th data-field="delete" class="text-center">刪除</th>
+                <th data-field="group" style="width: 30px;"></th>
+                <th data-field="list">列表</th>
+                <th data-field="add">新增</th>
+                <th data-field="view">檢視</th>
+                <th data-field="edit">編輯</th>
+                <th data-field="delete">刪除</th>
+                <th data-field="other_a" style="width: 30px;"></th>
                 <th data-field="other" class="text-center">其它</th>
             </tr>
             </thead>
             <tbody>
             {% for item_model in list %}
                 <tr class="bg-color-222">
-                    <td class="text-left brand-text-color bg-color-222">{% if item_model.plugins_check %}
-                        <input type="checkbox" {% if item_model.plugins_check.enable %}checked{% endif %} id="ro-field-{{ item_model.plugins_check.checkbox_id }}" data-uri="{{ item_model.plugins_check.uri }}">
-                        <label for="ro-field-{{ item_model.plugins_check.checkbox_id }}"><b class="text-success"></b></label>{% endif %}<strong>{{ item_model.name }}</strong></td>
-                    <td colspan="7" class="text-left brand-text-color bg-color-222">說明：{{ item_model.desc }}</td>
+                    <td class="text-left brand-text-color bg-color-222"><strong>{{ item_model.name }}</strong></td>
+                    <td colspan="8" class="text-left brand-text-color bg-color-222">
+{#                        {% if item_model.plugins_check %}#}
+{#                        <input type="checkbox" {% if item_model.plugins_check.enable %}checked{% endif %} id="ro-field-{{ item_model.plugins_check.checkbox_id }}" data-uri="{{ item_model.plugins_check.uri }}">#}
+{#                        <label for="ro-field-{{ item_model.plugins_check.checkbox_id }}"><b class="text-success">啟用/停用功能</b></label>{% endif %}#}
+                        說明：{{ item_model.desc }}</td>
                 </tr>
                 {% for item in item_model.controllers %}
                 {% if len(item.actions) > 1 or item.actions[0].action != "plugins_check" %}
                 <tr>
-                    <td class="text-left"></td>
                     <td class="text-left"><b>{{ item.group }}</b></td>
+                    <td class="text-left bg-color-222"></td>
                     <td class="text-left">{% if item.list %}
                         <input type="checkbox" {% if item.list.enable %}checked{% endif %} id="ro-field-{{ item.list.checkbox_id }}" data-uri="{{ item.list.uri }}">
                         <label for="ro-field-{{ item.list.checkbox_id }}">{{ item.list.name }}</label>{% endif %}</td>
@@ -59,9 +62,10 @@
                     <td class="text-left">{% if item.delete %}
                         <input type="checkbox" {% if item.delete.enable %}checked{% endif %} id="ro-field-{{ item.delete.checkbox_id }}" data-uri="{{ item.delete.uri }}">
                         <label for="ro-field-{{ item.delete.checkbox_id }}">{{ item.delete.name }}</label>{% endif %}</td>
-                    <td class="text-left">{% for act in item.actions %}{% if act.action not in ["list", "add", "view", "edit", "delete", "plugins_check"] %}
+                    <td class="text-left bg-color-222"></td>
+                    <td class="text-left">{% for act in item.actions %}{% if act.action not in ["list", "add", "view", "edit", "delete", "plugins_check", "super_user_menu"] %}
                         <input type="checkbox" {% if act.enable %}checked{% endif %} id="ro-field-{{ act.checkbox_id }}" data-uri="{{ act.uri }}">
-                        <label for="ro-field-{{ act.checkbox_id }}">{{ act.name }}</label>{% endif %}{% endfor %}</td>
+                        <label for="ro-field-{{ act.checkbox_id }}">{{ act.name }}</label><br>{% endif %}{% endfor %}</td>
                 </tr>
                 {% endif %}
             {% endfor %}
@@ -73,8 +77,8 @@
 </div>
 {% endblock %}
 
-{% block layout_scripts -%}
-    {% if uri_exists_with_permission(action="permissions_set_json", item=item) %}
+{% block page_scripts -%}
+    {% if uri_permission(action="permissions_set_json", item=item) %}
     <script type="text/javascript">
         (function(page){
             page["afterLoad"] = function(){

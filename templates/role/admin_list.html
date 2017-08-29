@@ -2,7 +2,7 @@
 {% block partial_thead_tr %}
     <th data-field="sortable" class="sorting-mode text-center srot-filed" style="width: 100px;">排序</th>
     {% for property in scaffolding.display_in_list -%}
-        <th data-field="{{ property }}" class="text-center">{{ s.scaffold_field_name(property) }}</th>
+        <th data-field="{{ property }}" class="text-center">{{ s.get_scaffold_field_title(property) }}</th>
     {% endfor -%}
     <th data-field="op" class="sorting-mode text-center srot-filed">權限</th>
 {% endblock %}
@@ -33,7 +33,7 @@
             <div class="checkbox checkbox-success">
                 <input type="checkbox" {% if item[property] %}checked{% endif %} id="{{ print_key(item) }}"
                        class="btn-checkbox-json">
-                <label for="{{ print_key(item) }}">{{ s.scaffold_field_name("short_" + property) }}</label>
+                <label for="{{ print_key(item) }}">{{ s.get_scaffold_field_title("short_" + property) }}</label>
             </div>
             {% else -%}{{ print_value(item[property]) }}{%- endif -%}
         </td>
@@ -46,7 +46,7 @@
 {% endfor -%}
 {% endblock %}
 
-{% block layout_buttons %}
+{% block page_fly_button %}
     {%- if scaffolding %}
         {% if uri_exists_with_permission(action="add") -%}
             <a href="{{ uri_action_link('add') }}" class="fbtn fbtn-lg fbtn-brand-accent waves-attach waves-circle waves-light"><span class="fbtn-text fbtn-text-left">{{ s.scaffold_title("add") }}</span><span class="icon icon-lg">edit</span></a>

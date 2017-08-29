@@ -1,7 +1,6 @@
 {% extends "backend/form.html" %}
-{%- block layout_header -%}{% endblock %}
-{% block layout_before_header %}
-<div class="ibox-content m-b-sm border-bottom page-header-big">
+{% block page_big_header %}
+<div class="ibox-content m-b-sm border-bottom page-big-header">
     <div class="p-xs">
         <div class="pull-left m-r-md">
             <i class="material-icons mid-icon brand-text-color">account_box</i>
@@ -11,8 +10,4 @@
         {% if last_record_date %}<span class="text-muted small pull-right visible-sm visible-md visible-lg">最後更新：<i class="icon">access_time</i> {{ print_value(last_record_date) }}</span>{% endif %}
     </div>
 </div>
-{% endblock %}
-
-{% block layout_buttons %}
-    <a class="fbtn fbtn-lg fbtn-brand-accent waves-attach waves-circle waves-light" href="javascript: saveForm();"><span class="fbtn-text fbtn-text-left">儲存個人資料</span><span class="icon icon-lg">save</span></a>
 {% endblock %}
