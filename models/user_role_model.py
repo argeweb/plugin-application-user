@@ -15,15 +15,16 @@ from role_model import RoleModel
 
 
 @on('application_user_init')
-def application_user_init(controller,
-      user_name=u'管理員',
-      user_account='admin',
-      user_password='qwER12#$',
-      user_prohibited_actions='plugins.plugins.backend_ui_material.controllers.backend_ui_material.super_user_menu',
-      user_image='/plugins/backend_ui_material/static/images/users/avatar-001.jpg'):
-    su_role = RoleModel.get_or_create('super_user', u'超級管理員', 9999, '')
-    admin_role = RoleModel.get_or_create('administrator', u'管理員', 999, user_prohibited_actions)
-    user_role = RoleModel.get_or_create('user', u'會員', 1, user_prohibited_actions)
+def application_user_init(
+        controller,
+        user_name=u'管理員',
+        user_account='admin',
+        user_password='qwER12#$',
+        user_prohibited_actions='plugins.backend_ui_material.controllers.backend_ui_material.super_user_menu',
+        user_image='/plugins/backend_ui_material/static/images/users/avatar-001.jpg', *args, **kwargs):
+    su_role = RoleModel.get_or_create_by_name('super_user', title=u'超級管理員', level=9999, prohibited_actions='')
+    admin_role = RoleModel.get_or_create_by_name('administrator', title=u'管理員', level=999, prohibited_actions=user_prohibited_actions)
+    user_role = RoleModel.get_or_create_by_name('user', title=u'會員', level=1, prohibited_actions=user_prohibited_actions)
     if ApplicationUserModel.has_record():
         su = ApplicationUserModel.get_by_name(u'super_user')
         admin = ApplicationUserModel.get_by_name(user_name)
@@ -37,12 +38,8 @@ def application_user_init(controller,
 
 
 class UserRoleModel(BasicModel):
-    user = Fields.KeyProperty(verbose_name=u'使用者', kind=ApplicationUserModel)
-    user_name = Fields.SearchingHelperProperty(verbose_name=u'使用者名稱', target='user', target_field_name='name')
-    user_account = Fields.SearchingHelperProperty(verbose_name=u'使用者帳號', target='user', target_field_name='account')
+    user = Fields.ApplicationUserProperty(verbose_name=u'使用者')
     role = Fields.KeyProperty(verbose_name=u'角色', kind=RoleModel)
-    role_name = Fields.SearchingHelperProperty(verbose_name=u'角色識別名稱', target='role', target_field_name='name')
-    role_title = Fields.SearchingHelperProperty(verbose_name=u'角色名稱', target='role', target_field_name='title')
 
     @classmethod
     def get_user_roles(cls, user):
@@ -71,18 +68,18 @@ class UserRoleModel(BasicModel):
     def remove_role(cls, user, role):
         role = cls.get_role(role)
         if role is None:
-            return None
-        n = cls.query(cls.user == user.key, cls.role == role.key).get()
-        if n is None:
-            ndb.delete_multi(n.key)
-        return n
+            return False
+        n = cls.query(cls.user == user.key, cls.role == role.key).get(keys_only=True)
+        if n is not None:
+            ndb.delete_multi([n.key])
+        return True
 
     @classmethod
     def has_role(cls, user, role):
         role = cls.get_role(role)
         if role is None:
             return False
-        n = cls.query(cls.user == user.key, cls.role == role.key).get()
+        n = cls.query(cls.user == user.key, cls.role == role.key).get(keys_only=True)
         if n:
             return True
         return False

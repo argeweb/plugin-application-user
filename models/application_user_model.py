@@ -1,28 +1,34 @@
-    #!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # Created with YooLiang Technology (侑良科技).
 # Author: Qi-Liang Wen (温啓良）
 # Web: http://www.yooliang.com/
 # Date: 2015/7/12.
+from google.appengine.api.datastore_errors import BadValueError
 
 from argeweb import BasicModel
 from argeweb import Fields
+from argeweb.core.model import ApplicationUserModel as UserModel
 from role_model import RoleModel as RoleModel
 from argeweb.libs.wtforms.validators import InputRequired
 # bcrypt use argeweb.libs.bcrypt.zip
 from bcrypt import bcrypt
 
 
-class ApplicationUserModel(BasicModel):
+class ApplicationUserModel(UserModel):
     name = Fields.StringProperty(required=True, verbose_name=u'名稱')
     account = Fields.StringProperty(required=True, verbose_name=u'帳號')
     password = Fields.StringProperty(required=True, verbose_name=u'密碼')
     email = Fields.StringProperty(verbose_name=u'E-Mail', default=u'')
+    is_email_verified = Fields.BooleanProperty(verbose_name=u'信箱是否已驗証', default=False)
     avatar = Fields.ImageProperty(verbose_name=u'頭像')
     is_enable = Fields.BooleanProperty(verbose_name=u'啟用', default=True)
     rest_password_token = Fields.StringProperty(verbose_name=u'重設密碼令牌', default=u'')
-    roles_helper = Fields.StringProperty(verbose_name=u'角色', default=u'user')
+    need_check_old_password = Fields.BooleanProperty(verbose_name=u'可設定新密碼', default=True)
+    role = Fields.HiddenProperty(verbose_name=u'角色', default=u'user')
+    provider = Fields.HiddenProperty(verbose_name=u'provider', default=u'website')
+    federated_id = Fields.HiddenProperty(verbose_name=u'federated id', default=u'')
 
     @property
     def title(self):
@@ -38,6 +44,12 @@ class ApplicationUserModel(BasicModel):
         if bcrypt.hashpw(password, a.password) != a.password:
             return None
         return a
+
+    @classmethod
+    def get_user_by_account(cls, account, check_is_enable=False):
+        if check_is_enable:
+            return cls.query(cls.account == account, cls.is_enable==True).get()
+        return cls.query(cls.account == account).get()
 
     @classmethod
     def get_user_by_email(cls, email, check_is_enable=False):
@@ -73,21 +85,17 @@ class ApplicationUserModel(BasicModel):
         return n
 
     @classmethod
-    def create_account_by_email(cls, email, password, role=None, avatar=None):
-        account = str(email).split('@')[0]
+    def create_account_by_email(cls, email, password, role=None, avatar=None, account=None, user_name=None):
+        if account is None:
+            account = str(email).split('@')[0]
         if role is None:
             role = RoleModel.find_lowest_level()
-        user = cls.create_account(account, account, password, '/plugins/backend_ui_material/static/images/users/avatar-001.jpg', email)
+        if user_name is None:
+            user_name = account
+        user = cls.create_account(user_name, account, password, '/plugins/backend_ui_material/static/images/users/avatar-001.jpg', email)
         from ..models.user_role_model import UserRoleModel
         UserRoleModel.set_role(user, role)
         return user
-
-    def try_to_create_user_role(self):
-        roles = (u'%s' % self.roles_helper).split(u',')
-        from ..models.user_role_model import UserRoleModel
-        for role in roles:
-            UserRoleModel.set_role(self, role.strip())
-        return self
 
     @classmethod
     def get_list(cls):
@@ -101,6 +109,15 @@ class ApplicationUserModel(BasicModel):
     def bycrypt_password(self):
         self.password = u'' + bcrypt.hashpw(u'' + self.password, bcrypt.gensalt())
         self.put()
+
+    def before_put(self):
+        n = []
+        try:
+            for r in self.roles:
+                n.append(r.role_name)
+            self.role = ','.join(n)
+        except (BadValueError, AttributeError):
+            self.role = ''
 
     @property
     def roles(self):
@@ -164,3 +181,16 @@ class ApplicationUserModel(BasicModel):
         if strict:
             return (not_in_count > 0) and (len(self.roles) == not_in_count)
         return not_in_count > 0
+
+    def gen_password_token(self):
+        from argeweb.core.random_util import gen_random_code
+        self.rest_password_token = gen_random_code()
+
+    @classmethod
+    def after_delete(cls, key):
+        from user_role_model import UserRoleModel
+        from google.appengine.ext import ndb
+        keys = []
+        for i in UserRoleModel.query(UserRoleModel.user == key).fetch():
+            keys.append(i.key)
+        ndb.delete_multi(keys)

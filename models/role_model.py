@@ -33,13 +33,6 @@ class RoleModel(BasicModel):
         return a
 
     @classmethod
-    def get_or_create(cls, name, title, level, prohibited_actions):
-        r = cls.get_role(name)
-        if r is None:
-            r = cls.create_role(name, title, level, prohibited_actions)
-        return r
-
-    @classmethod
     def get_list(cls):
         return cls.query(cls.level < 1000).order(cls.level, -cls.sort)
 

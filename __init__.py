@@ -16,7 +16,7 @@ create_account = ApplicationUserModel.create_account
 
 
 @on('disable_role_action')
-def disable_action(controller, action_uri):
+def disable_action(controller, action_uri, *args, **kwargs):
     roles = RoleModel.all().fetch()
     for role in roles:
         role_prohibited_actions_list = str(role.prohibited_actions).split(',')
@@ -27,7 +27,7 @@ def disable_action(controller, action_uri):
 
 
 @on('enable_role_action')
-def enable_action(controller, action_uri):
+def enable_action(controller, action_uri, *args, **kwargs):
     roles = RoleModel.all().fetch()
     for role in roles:
         role_prohibited_actions_list = str(role.prohibited_actions).split(',')
@@ -35,6 +35,18 @@ def enable_action(controller, action_uri):
             role_prohibited_actions_list.remove(action_uri)
         role.prohibited_actions = ','.join(role_prohibited_actions_list)
     ndb.put_multi(roles)
+
+
+@on('after_user_signup')
+def after_user_signup(controller, user, *args, **kwargs):
+    from plugins.application_user.models.user_role_model import UserRoleModel
+    from models.config_model import ConfigModel
+    config = ConfigModel.get_config()
+    roles = config.first_login_roles.split(',')
+    if len(roles) == 0:
+        roles = ['user']
+    for item in roles:
+        UserRoleModel.set_role(user, item.strip())
 
 __all__ = (
     'get_user',

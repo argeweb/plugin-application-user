@@ -14,9 +14,6 @@ from argeweb.components.search import Search
 
 
 class Role(Controller):
-    class Meta:
-        components = (scaffold.Scaffolding, Pagination, Search, CSRF)
-
     class Scaffold:
         display_in_form = ('title', 'name', 'level')
         display_in_list = ['title', 'name', 'level']

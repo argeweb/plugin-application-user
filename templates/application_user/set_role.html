@@ -17,9 +17,8 @@
                         <td>
                             <input type="checkbox" name="role" {% if role.has_role %}checked{% endif %}
                                class="btn-checkbox-json"
-                               data-enable-url="{{ uri_action_link('set_user_role', application_user) }}?role={{ print_key(role) }}&value=true"
-                               data-disable-url="{{ uri_action_link('set_user_role', application_user) }}?role={{ print_key(role) }}&value=false"
-
+                               data-enable-url="{{ uri_action_link('set_user_role', target_user) }}?role={{ print_key(role) }}&value=true"
+                               data-disable-url="{{ uri_action_link('set_user_role', target_user) }}?role={{ print_key(role) }}&value=false"
                             />
                         </td>
                     </tr>

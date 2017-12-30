@@ -14,14 +14,11 @@ from argeweb.components.search import Search
 
 
 class UserRole(Controller):
-    class Meta:
-        components = (scaffold.Scaffolding, Pagination, Search, CSRF)
-
     class Scaffold:
-        display_in_form = ['name', 'user', 'role']
-        display_in_list = ['name', 'user', 'role']
+        display_in_form = ['user', 'role']
+        display_in_list = ['user', 'user_account', 'role']
 
-    @route_menu(list_name=u'super_user', group=u'帳號管理', text=u'帳號角色管理', sort=9803, icon='users')
+    @route_menu(list_name=u'super_user', group=u'帳號管理', text=u'帳號角色管理', sort=9803, icon='account_box')
     def admin_list(self):
         from ..models.role_model import RoleModel
         self.context['su_key'] = RoleModel.get_role('super_user').key

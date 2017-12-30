@@ -10,12 +10,10 @@ from argeweb import Controller, scaffold, route_menu, route_with, route
 from argeweb.components.pagination import Pagination
 from argeweb.components.csrf import CSRF, csrf_protect
 from argeweb.components.search import Search
+from argeweb.core.ndb import decode_key
 
 
 class ApplicationUser(Controller):
-    class Meta:
-        components = (scaffold.Scaffolding, Pagination, Search, CSRF)
-
     class Scaffold:
         display_in_form = ['name', 'account', 'is_enable', 'sort', 'created', 'modified']
         hidden_in_form = ['rest_password_token']
@@ -40,6 +38,7 @@ class ApplicationUser(Controller):
 
     def check_level(self, target):
         self.target = target
+        self.target_level = target.get_role_level()
         self.application_user_level = self.application_user.get_role_level()
         if self.application_user_level < self.target_level:
             return False
@@ -47,19 +46,20 @@ class ApplicationUser(Controller):
 
     @route
     def admin_set_role(self, source):
-        if self.check_level(self.params.get_ndb_record(source)) is False:
+        target_user = self.params.get_ndb_record(source)
+        if self.check_level(target_user) is False:
             return self.abort(403)
         from ..models.role_model import RoleModel
         from ..models.user_role_model import UserRoleModel
         roles = RoleModel.get_list()
-        user_roles = UserRoleModel.get_user_roles(self.application_user)
+        user_roles = UserRoleModel.get_user_roles(target_user).fetch()
         for role in roles:
             has_role = False
             for user_role in user_roles:
-                if role.name == user_role.role_name:
+                if role.key == user_role.role:
                     has_role = True
             setattr(role, 'has_role', has_role)
-        self.context['application_user'] = self.application_user
+        self.context['target_user'] = target_user
         self.context['roles'] = roles
 
     @route
@@ -79,20 +79,27 @@ class ApplicationUser(Controller):
         self.context['data'] = {'info': 'success'}
         self.context['message'] = u'%s 已 %s' % (role.title, val_word)
 
-    @route_menu(list_name=u'backend', group=u'帳號管理', text=u'帳號管理', sort=9801, icon='users')
+    @route_menu(list_name=u'backend', group=u'帳號管理', text=u'帳號管理', sort=9801, icon='users', need_hr=True, need_hr_parent=True)
     def admin_list(self):
+        self.meta.pagination_limit = 10
         self.context['application_user_key'] = self.application_user.key
         self.context['application_user_level'] = self.application_user.get_role_level()
-        scaffold.list(self)
-        for item in self.context[self.scaffold.plural]:
-            item.level = item.get_role_level()
+        return scaffold.list(self)
+        # from ..models.role_model import RoleModel
+        # roles = RoleModel.query().fetch()
+        # for item in self.context[self.scaffold.plural]:
+        #     item.level = 0
+        # for role in roles:
+        #     role_level = role.level
+        #     for item in self.context[self.scaffold.plural]:
+        #         if item.has_role(role) and item.level < role_level:
+        #             item.level = role_level
 
     @csrf_protect
     def admin_add(self):
         def bycrypt_password(**kwargs):
             item = kwargs['item']
             item.bycrypt_password()
-            item.try_to_create_user_role()
         self.events.scaffold_after_save += bycrypt_password
         return scaffold.add(self)
 
@@ -114,7 +121,6 @@ class ApplicationUser(Controller):
         def bycrypt_password(**kwargs):
             item = kwargs['item']
             item.bycrypt_password_with_old_password()
-            item.try_to_create_user_role()
 
         if self.check_level(self.params.get_ndb_record(key)) is False:
             return self.abort(403)
@@ -160,9 +166,22 @@ class ApplicationUser(Controller):
         return scaffold.edit(self, self.application_user.key)
 
     def admin_delete(self, key):
-        if self.check_level(self.params.get_ndb_record(key)) is False:
+        target_key = decode_key(key)
+        target = target_key.get()
+        if self.check_level(target) is False:
             return self.abort(403)
-        return scaffold.delete(self, key)
+        self.fire(event_name=u'before_user_delete', key=target_key)
+        scaffold.delete(self, key)
+        self.fire(event_name=u'after_user_delete', key=target_key)
+
+    @route
+    @route_menu(list_name=u'super_user', group=u'帳號管理', text=u'以 E-Mmail 重置帳號', sort=9803, icon='account_box')
+    def admin_reset_account(self):
+        for user in self.meta.Model.all():
+            if user.account.find(u"@") < 0 and user.email.find(u"@") > 0:
+                user.account = user.email
+                user.put()
+        return self.json_success_message(u'完成')
 
     @route_with('/login.json')
     def login_json(self):
@@ -193,7 +212,7 @@ class ApplicationUser(Controller):
         if self.request.method != 'POST':
             return
 
-        input_email = self.params.get_string('email').strip()
+        input_email = self.params.get_email('email')
         input_password = self.params.get_string('password').strip()
         if input_email == u'' or input_password == u'':
             return
