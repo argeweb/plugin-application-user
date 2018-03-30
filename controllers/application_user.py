@@ -15,14 +15,15 @@ from argeweb.core.ndb import decode_key
 
 class ApplicationUser(Controller):
     class Scaffold:
+        pagination_limit = 100
         display_in_form = ['name', 'account', 'is_enable', 'sort', 'created', 'modified']
-        hidden_in_form = ['rest_password_token']
         display_in_list = ['name', 'account', 'email', 'is_enable', 'created']
+        hidden_in_form = ['rest_password_token']
         actions_in_list = [{
             'name': 'role_list',
             'title': u'角色',
-            'uri': 'admin:application_user:application_user:set_role',
-            'button': u'角色'
+            'button': u'角色',
+            'uri': 'admin:application_user:application_user:set_role'
         }]
 
     def __init__(self, *args, **kwargs):
@@ -110,6 +111,7 @@ class ApplicationUser(Controller):
             item = kwargs['item']
             item.old_password = item.password
             item.new_password = parser.data['password']
+            self.logging.debug(item.new_password)
 
             def validate():
                 if self.application_user_level < self.target_level:

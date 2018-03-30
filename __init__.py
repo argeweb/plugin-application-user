@@ -7,12 +7,23 @@
 # Date: 2015/7/12.
 from google.appengine.ext import ndb
 
+from argeweb import ViewFunction
 from argeweb.core.events import on
 from .models.user_role_model import UserRoleModel, RoleModel, ApplicationUserModel, application_user_init
+
+ViewFunction.register(ApplicationUserModel.all_count, name='global:count_application_user')
+ViewFunction.register(ApplicationUserModel.all_count_with_date, name='global:count_application_user_with_date')
+
 
 get_user = ApplicationUserModel.get_user
 has_record = ApplicationUserModel.has_record
 create_account = ApplicationUserModel.create_account
+__all__ = (
+    'get_user',
+    'has_record',
+    'create_account',
+    'application_user_init'
+)
 
 
 @on('disable_role_action')
@@ -48,12 +59,6 @@ def after_user_signup(controller, user, *args, **kwargs):
     for item in roles:
         UserRoleModel.set_role(user, item.strip())
 
-__all__ = (
-    'get_user',
-    'has_record'
-    'create_account'
-    'application_user_init'
-)
 
 plugins_helper = {
     'title': u'使用者',

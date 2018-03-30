@@ -71,7 +71,7 @@ class UserRoleModel(BasicModel):
             return False
         n = cls.query(cls.user == user.key, cls.role == role.key).get(keys_only=True)
         if n is not None:
-            ndb.delete_multi([n.key])
+            ndb.delete_multi([n])
         return True
 
     @classmethod

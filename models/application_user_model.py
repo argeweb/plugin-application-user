@@ -72,6 +72,11 @@ class ApplicationUserModel(UserModel):
             return None
         return a
 
+    def check_password(self, check):
+        if bcrypt.hashpw(check, self.password) != self.password:
+            return False
+        return True
+
     @classmethod
     def create_account(cls, name, account, password, avatar=None, email=None):
         n = cls()
@@ -194,3 +199,23 @@ class ApplicationUserModel(UserModel):
         for i in UserRoleModel.query(UserRoleModel.user == key).fetch():
             keys.append(i.key)
         ndb.delete_multi(keys)
+
+    @classmethod
+    def all_count(cls, *args, **kwargs):
+        """ 回傳目前的總使用者人數
+        :return: 人數
+        """
+        return cls.query().count(keys_only=True)
+
+    @classmethod
+    def all_count_with_date(cls, date=None, *args, **kwargs):
+        """ 回傳特定日期加入的使用者人數
+        :return: 人數
+        """
+        from datetime import timedelta
+        if date is None:
+            from datetime import datetime
+            date = datetime.today()
+        date_start = date + timedelta(days=-1)
+        date_end = date + timedelta(days=+1)
+        return cls.query(cls.created > date_start, cls.created < date_end).count(keys_only=True)
