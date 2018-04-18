@@ -11,7 +11,7 @@ from argeweb import BasicModel
 from argeweb import Fields
 from argeweb.core.model import ApplicationUserModel as UserModel
 from role_model import RoleModel as RoleModel
-from argeweb.libs.wtforms.validators import InputRequired
+from argeweb.core.forms.wtforms.validators import InputRequired
 # bcrypt use argeweb.libs.bcrypt.zip
 from bcrypt import bcrypt
 
