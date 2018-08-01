@@ -131,6 +131,13 @@ class ApplicationUserModel(UserModel):
             self._roles = UserRoleModel.get_user_roles(self).fetch()
         return self._roles
 
+    @property
+    def role_list(self):
+        roles = []
+        for r in self.roles:
+            roles.append(r.role.get().name)
+        return roles
+
     def get_role_level(self, highest=True):
         if not hasattr(self, '_level'):
             level = 0
